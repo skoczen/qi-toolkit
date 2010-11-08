@@ -21,6 +21,9 @@
 # from fabbase import *
 # then override the Custom Config params with your own.
 
+from __future__ import with_statement # needed for python 2.5
+from fabric.api import *
+
 # Custom Config Start
 env.project_name = ''
 env.virtualenv_name = ""
