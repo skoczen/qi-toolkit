@@ -65,7 +65,6 @@ def local():
     env.is_local = True
 
 def magic_run(function_call):
-    print function_call
     if env.is_local:
         return fabric.operations.local(function_call)
     else:
