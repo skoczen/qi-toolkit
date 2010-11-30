@@ -8,4 +8,3 @@ class EnvMiddleware(object):
             request['context']['ENV'] = settings.ENV
         except:
             pass
-        return request

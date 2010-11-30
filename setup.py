@@ -7,7 +7,7 @@ SOURCE_DIR = os.path.join(ROOT_DIR)
 
 setup(
     name = "qi-toolkit",
-    version = "0.2.4",
+    version = "0.2.5",
     packages = find_packages(),
     zip_safe = False,
 )
