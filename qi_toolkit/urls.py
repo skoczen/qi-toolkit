@@ -7,7 +7,10 @@ urlpatterns = patterns('',
     url(r'^robots.txt',     robots.robots_txt,          name='robots_txt'),
 )
 
-if "FAVICON_URL" in settings:
-    urlpatterns += patterns('',          
-	    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': settings.FAVICON_URL}),
-    )
+try:
+    if settings.FAVICON_URL != "":
+        urlpatterns += patterns('',          
+    	    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': settings.FAVICON_URL}),
+        )
+except:
+    pass
