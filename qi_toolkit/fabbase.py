@@ -20,21 +20,26 @@
 # Generally, 
 
 # from qi_toolkit.fabbase import *
-# setup_env(project_name='projname', webfaction_user='username')
+# initial_settings = {
+#     'project_name': 'projname',
+#     'webfaction_user': 'username',
+# }
+# overrides = {
+# 
+# }
+# setup_env(settings=initial_settings, overrides=overrides)
 
-
-# then override the Custom Config params if needed.  
-# to override them, you'll need to import the fabric api.
 
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
-def setup_env():
-    env.project_name = PROJECT_NAME
-    env.webfaction_user = WEBFACTION_USER
+def setup_env(settings={}, overrides={}):
+    global env
+    env.project_name = "changeme"
+    env.webfaction_user = "changeme"
 
     # Custom Config Start
-    env.parent = PARENT or "origin"
+    env.parent = "origin"
     env.working_branch = "master"
     env.live_branch = "live"
     env.python = "python"
@@ -42,6 +47,8 @@ def setup_env():
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
 
+    env.update(settings)
+    
     # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
     env.production_hosts = ['%(webfaction_user)s.webfactional.com' % env] 
     env.webfaction_home = "/home/%(webfaction_user)s" % env
@@ -57,9 +64,10 @@ def setup_env():
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
 
+    env.update(overrides)
+setup_env()
 
 def live():
-    setup_env()
     env.python = "python2.6"
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
@@ -70,7 +78,6 @@ def live():
     
     
 def staging():
-    setup_env()
     env.python = "python2.6"
     env.hosts = env.staging_hosts
     env.base_path = env.staging_app_dir
@@ -82,7 +89,6 @@ def staging():
     env.work_on = "workon %(virtualenv_name)s; " % env
 
 def localhost():
-    setup_env()
     env.hosts = ['localhost']
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
     env.git_path = env.base_path
@@ -219,4 +225,3 @@ def reset(repo, hash):
     env.hash = hash
     env.repo = repo
     invoke(git_reset)
-    
