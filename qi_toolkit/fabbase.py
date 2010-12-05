@@ -19,14 +19,19 @@
 # Usage
 # Generally, 
 
+# PROJECT_NAME = 'jeffandkatie'
+# WEBFACTION_USER = 'skoczen'
 # from qi_toolkit.fabbase import *
-# env.project_name = 'project'
-# env.webfaction_user = 'username'
 
-# then override the Custom Config params if needed.  For me, that's all there is to it.
+
+# then override the Custom Config params if needed.  
+# to override them, you'll need to import the fabric api.
 
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
+
+env.project_name = PROJECT_NAME
+env.webfaction_user = WEBFACTION_USER
 
 # Custom Config Start
 env.parent = "origin"
