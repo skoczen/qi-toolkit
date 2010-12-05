@@ -35,7 +35,7 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
-def setup_env(project_name, webfaction_user, initial_settings={}, overrides={}):
+def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
     global env
     env.project_name = project_name
     env.webfaction_user = webfaction_user
@@ -68,6 +68,39 @@ def setup_env(project_name, webfaction_user, initial_settings={}, overrides={}):
 
     env.update(overrides)
 
+def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, overrides={}):
+    raise "Not Yet Implemented"
+    global env
+    env.project_name = project_name
+    env.webfaction_user = webfaction_user
+
+    # Custom Config Start
+    env.parent = "origin"
+    env.working_branch = "master"
+    env.live_branch = "live"
+    env.python = "python"
+    env.is_local = False
+    env.local_working_path = "~/workingCopy"
+    env.media_dir = "media"
+
+    env.update(initial_settings)
+
+    # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
+    env.production_hosts = ['%(webfaction_user)s.webfactional.com' % env] 
+    env.webfaction_home = "/home/%(webfaction_user)s" % env
+    env.git_origin = "%(webfaction_user)s@%(webfaction_user)s.webfactional.com:%(webfaction_home)s/git-root/%(project_name)s.git" % env
+
+    env.staging_hosts = env.production_hosts
+    env.virtualenv_name = env.project_name
+    env.staging_virtualenv_name = "staging_%(project_name)s" % env
+    env.live_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_live" % env
+    env.live_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_static" % env
+    env.staging_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging" % env
+    env.staging_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging_static" % env
+    env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
+    env.work_on = "workon %(virtualenv_name)s; " % env
+
+    env.update(overrides)
 
 def live():
     env.python = "python2.6"
