@@ -30,11 +30,11 @@ from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
 def setup_env(project_name, webfaction_user):
-    env.project_name = project_name
-    env.webfaction_user = webfaction_user
+    env.project_name = PROJECT_NAME
+    env.webfaction_user = WEBFACTION_USER
 
     # Custom Config Start
-    env.parent = "origin"
+    env.parent = PARENT or "origin"
     env.working_branch = "master"
     env.live_branch = "live"
     env.python = "python"
@@ -57,7 +57,9 @@ def setup_env(project_name, webfaction_user):
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
 
+
 def live():
+    setup_env()
     env.python = "python2.6"
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
@@ -68,6 +70,7 @@ def live():
     
     
 def staging():
+    setup_env()
     env.python = "python2.6"
     env.hosts = env.staging_hosts
     env.base_path = env.staging_app_dir
@@ -79,6 +82,7 @@ def staging():
     env.work_on = "workon %(virtualenv_name)s; " % env
 
 def localhost():
+    setup_env()
     env.hosts = ['localhost']
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
     env.git_path = env.base_path
