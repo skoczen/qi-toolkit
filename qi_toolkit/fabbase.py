@@ -17,17 +17,19 @@
 
 
 # Usage
-# Generally, 
+# Basic:
+# from qi_toolkit.fabbase import *
+# setup_env(project_name='projname',webfaction_user='username')
 
+# Advanced
 # from qi_toolkit.fabbase import *
 # initial_settings = {
-#     'project_name': 'projname',
-#     'webfaction_user': 'username',
+#   'media_dir':'static',
 # }
 # overrides = {
-# 
+#   'workon': 'echo "no work today"',
 # }
-# setup_env(settings=initial_settings, overrides=overrides)
+# setup_env(project_name='projname',webfaction_user='username', initial_settings=initial_settings, overrides=overrides)
 
 
 from __future__ import with_statement # needed for python 2.5
