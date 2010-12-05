@@ -19,9 +19,8 @@
 # Usage
 # Generally, 
 
-# PROJECT_NAME = 'jeffandkatie'
-# WEBFACTION_USER = 'skoczen'
 # from qi_toolkit.fabbase import *
+# setup_env(project_name='projname', webfaction_user='username')
 
 
 # then override the Custom Config params if needed.  
@@ -30,9 +29,9 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
-def setup_env():
-    env.project_name = PROJECT_NAME
-    env.webfaction_user = WEBFACTION_USER
+def setup_env(project_name, webfaction_user):
+    env.project_name = project_name
+    env.webfaction_user = webfaction_user
 
     # Custom Config Start
     env.parent = "origin"
