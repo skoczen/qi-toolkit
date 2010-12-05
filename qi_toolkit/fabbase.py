@@ -29,7 +29,7 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
-def setup_env(project_name, webfaction_user):
+def setup_env():
     env.project_name = PROJECT_NAME
     env.webfaction_user = WEBFACTION_USER
 
