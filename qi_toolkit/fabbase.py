@@ -33,10 +33,10 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 
-def setup_env(settings={}, overrides={}):
+def setup_env(project_name, webfaction_user, initial_settings={}, overrides={}):
     global env
-    env.project_name = "changeme"
-    env.webfaction_user = "changeme"
+    env.project_name = project_name
+    env.webfaction_user = webfaction_user
 
     # Custom Config Start
     env.parent = "origin"
@@ -47,7 +47,7 @@ def setup_env(settings={}, overrides={}):
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
 
-    env.update(settings)
+    env.update(initial_settings)
     
     # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
     env.production_hosts = ['%(webfaction_user)s.webfactional.com' % env] 
@@ -65,7 +65,7 @@ def setup_env(settings={}, overrides={}):
     env.work_on = "workon %(virtualenv_name)s; " % env
 
     env.update(overrides)
-setup_env()
+
 
 def live():
     env.python = "python2.6"
