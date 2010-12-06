@@ -1,3 +1,5 @@
+from django.shortcuts import render_to_response
+
 def render_to(template):
     """
     Decorator for Django views that sends returned dict to render_to_response function
@@ -22,3 +24,11 @@ def render_to(template):
             return output
         return wrapper
     return renderer
+
+
+def print_exception():
+    import traceback
+    import sys
+    print "######################## Exception #############################"
+    print '\n'.join(traceback.format_exception(*sys.exc_info()))
+    print "################################################################"
