@@ -1,5 +1,5 @@
 from django.shortcuts import render_to_response
-
+from django.template import RequestContext
 def render_to(template):
     """
     Decorator for Django views that sends returned dict to render_to_response function
