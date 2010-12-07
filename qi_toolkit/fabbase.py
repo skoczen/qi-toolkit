@@ -153,6 +153,24 @@ def magic_run(function_call):
             return run(function_call % env)
 
 def setup_server():
+    try:
+        magic_run("mkdir src")
+    except:
+        pass
+
+    try:
+        magic_run("git")
+    except:
+        env.git_file_version = "1.7.3.3"
+        magic_run("cd src;wget http://kernel.org/pub/software/scm/git/git-%(git_file_version)s.tar.bz2")
+        magic_run("cd src;tar fxz git-%(git_file_version)s.tar.gz; cd git-%(git_file_version)s;./configure --prefix=$HOME/git/; make; make install;")
+        magic_run("echo \"export PATH=$PATH:/%(webfaction_home)s/git/bin/\" >> %(webfaction_home)s/.bash_profile")
+
+    try:
+        magic_run("pip")
+    except:
+        magic_run("easy_install pip")
+    magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
     magic_run("mkvirtualenv %(virtualenv_name)s;")
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
     try:
