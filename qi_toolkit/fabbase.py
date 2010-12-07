@@ -37,6 +37,7 @@ from fabric.api import *
 
 def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
     global env
+    env.dry_run = False
     env.project_name = project_name
     env.webfaction_user = webfaction_user
 
@@ -48,13 +49,14 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.is_local = False
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
+    env.webfaction_host = '%(webfaction_user)s.webfactional.com' % env
 
     env.update(initial_settings)
     
     # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
-    env.production_hosts = ['%(webfaction_user)s.webfactional.com' % env] 
+    env.production_hosts = ['%(webfaction_host)s' % env] 
     env.webfaction_home = "/home/%(webfaction_user)s" % env
-    env.git_origin = "%(webfaction_user)s@%(webfaction_user)s.webfactional.com:%(webfaction_home)s/git-root/%(project_name)s.git" % env
+    env.git_origin = "%(webfaction_user)s@%(webfaction_host)s:%(webfaction_home)s/git-root/%(project_name)s.git" % env
 
     env.staging_hosts = env.production_hosts
     env.virtualenv_name = env.project_name
@@ -71,6 +73,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
 def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, overrides={}):
     raise "Not Yet Implemented"
     global env
+    env.dry_run = False    
     env.project_name = project_name
     env.webfaction_user = webfaction_user
 
@@ -140,8 +143,8 @@ env.roledefs = {
 }
 
 # Custom Config End
-def magic_run(function_call, dry_run=False):
-    if dry_run:
+def magic_run(function_call):
+    if env.dry_run:
         print function_call % env
     else:
         if env.is_local:
