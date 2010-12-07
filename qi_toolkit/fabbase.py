@@ -142,6 +142,13 @@ env.roledefs = {
     'local':[local]
 }
 
+def safe(function_call, *args, **kwargs):
+    try:
+        ret = function_call(*args, **kwargs)
+        return ret
+    except:
+        pass
+
 # Custom Config End
 def magic_run(function_call):
     if env.dry_run:
@@ -154,23 +161,35 @@ def magic_run(function_call):
 
 def setup_server():
     try:
-        magic_run("mkdir src")
+        safe(magic_run("mkdir %(webfaction_home)s/src"))
+        magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
     except:
         pass
 
     try:
-        magic_run("git")
+        magic_run("git --version")
     except:
         env.git_file_version = "1.7.3.3"
         magic_run("cd src;wget http://kernel.org/pub/software/scm/git/git-%(git_file_version)s.tar.bz2")
-        magic_run("cd src;tar fxz git-%(git_file_version)s.tar.gz; cd git-%(git_file_version)s;./configure --prefix=$HOME/git/; make; make install;")
-        magic_run("echo \"export PATH=$PATH:/%(webfaction_home)s/git/bin/\" >> %(webfaction_home)s/.bash_profile")
+        magic_run("cd  %(webfaction_home)s/src/; tar fxj git-%(git_file_version)s.tar.bz2;")
+        magic_run("cd %(webfaction_home)s/src/git-%(git_file_version)s; ./configure --prefix=%(webfaction_home)s/git/; make; make install;")
+        magic_run("echo \"export PATH=$PATH:/%(webfaction_home)s/git/bin/\" >> %(webfaction_home)s/.bashrc")
 
     try:
         magic_run("pip")
     except:
-        magic_run("easy_install pip")
+        try:
+            safe(magic_run("mkdir %(webfaction_home)s/lib:"))
+        except:
+            pass
+        try:
+            safe(magic_run("mkdir %(webfaction_home)s/lib/python2.6"))
+        except:
+            pass
+        magic_run("easy_install-2.6 pip")
+
     magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
+    safe(magic_run("mkdir %(webfaction_home)s/.virtualenvs"))    
     magic_run("mkvirtualenv %(virtualenv_name)s;")
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
     try:
@@ -212,10 +231,10 @@ def make_wsgi_file():
     magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
     
 def setup_django_admin_media_symlinks():
-    magic_run("cd %(media_path)s; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
+    magic_run("cd %(media_path)s; touch admin; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
 
 def setup_cms_symlinks():
-    magic_run("cd %(media_path)s; rm cms; ln -s %(virtualenv_path)s../../../src/django-cms/cms/media/cms .")
+    magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)s../../../src/django-cms/cms/media/cms .")
 
 def pull():
     "Updates the repository."
