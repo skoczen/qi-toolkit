@@ -1,4 +1,5 @@
 from django.db import models
+import re
 
 class SimpleSearchableModel(models.Model):
 
@@ -16,14 +17,19 @@ class SimpleSearchableModel(models.Model):
         super(SimpleSearchableModel,self).save(*args, **kwargs)
 
     @classmethod
-    def search(cls, query, delimiter=" "):
+    def search(cls, query, delimiter=" ", ignorable_chars=None):
+        # Accept a list of ignorable characters to strip from the query (dashes in phone numbers, etc)
+        if ignorable_chars:
+            ignorable_re = re.compile("[%s]+"%("".join(ignorable_chars)))
+            query = ignorable_re.sub('',query)
+        
+        # Split the querystring by a given delimiter.
         if delimiter and delimiter != "":
             queries = query.split(delimiter)
         else:
             queries = [query]
         
         results = cls.objects.all()
-        
         for q in queries:
             if q != "":
                 results = results.filter(qi_simple_searchable_search_field__icontains=q)
