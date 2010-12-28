@@ -14,3 +14,6 @@ class SimpleSearchableModel(models.Model):
             self.qi_simple_searchable_search_field = self.__unicode__()
 
         super(SimpleSearchableModel,self).save(*args, **kwargs)
+        
+    class Meta:
+        abstract = True
