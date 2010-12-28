@@ -14,6 +14,19 @@ class SimpleSearchableModel(models.Model):
             self.qi_simple_searchable_search_field = self.__unicode__()
 
         super(SimpleSearchableModel,self).save(*args, **kwargs)
+
+    @classmethod
+    def search(cls, query, delimiter=","):
+        if delimiter and delimiter != "":
+            queries = query.split(delimiter)
+        else:
+            queries = [query]
         
+        results = cls.objects.none()
+        
+        for q in queries:
+            results |= cls.objects.filter(qi_simple_searchable_search_field__icontains=q)
+        return results
+
     class Meta:
         abstract = True
