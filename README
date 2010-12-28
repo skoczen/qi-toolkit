@@ -6,4 +6,7 @@ It's pretty bare right now, but will see buildout as the joy of consolidation sp
 Includes:
 - fabbase.py - the base fabric setup for (mostly) webfaction deploys
 - smoke_tests.py - a helper method for running quick django client tests.
-- env_middleware.py - a simple middleware that adds ENV to the request context (from settings.ENV)
+- context_processors.py - a simple context processor that adds ENV to the request context (from settings.ENV)
+- helpers.py - helpers for rendering views
+- robots.py - basic robots.txt handling
+- factory.py - a base factory class for common data generation.
