@@ -26,8 +26,7 @@ class SimpleSearchableModel(models.Model):
         
         for q in queries:
             if q != "":
-                print q
-                results |= cls.objects.filter(qi_simple_searchable_search_field__icontains=q)
+                results &= cls.objects.filter(qi_simple_searchable_search_field__icontains=q)
 
         return results
 
