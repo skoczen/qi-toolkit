@@ -22,11 +22,11 @@ class SimpleSearchableModel(models.Model):
         else:
             queries = [query]
         
-        results = cls.objects.none()
+        results = cls.objects.all()
         
         for q in queries:
             if q != "":
-                results &= cls.objects.filter(qi_simple_searchable_search_field__icontains=q)
+                results = results.filter(qi_simple_searchable_search_field__icontains=q)
 
         return results
 
