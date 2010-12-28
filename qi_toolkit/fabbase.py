@@ -278,6 +278,9 @@ def backup():
     if env.is_local:
         magic_run("cp %(backup_file_path)s %(git_path)s/db/all_data.json")
 
+def migrate():
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
+
 def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
 
@@ -285,6 +288,7 @@ def deploy():
     backup()
     pull()
     install_requirements()
+    migrate()
     reboot()
 
 def test():
