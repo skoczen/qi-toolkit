@@ -2,7 +2,7 @@ from django.db import models
 import re
 import datetime
 
-class TimestampModelMixin(models.Model):
+class TimestampModelMixin(object):
     created_at = models.DateField(blank=True, null=True)
     modified_at = models.DateField(blank=True, null=True)
     
@@ -12,8 +12,6 @@ class TimestampModelMixin(models.Model):
             self.created_at = self.modified_at
         super(SimpleSearchableModel,self).save(*args, **kwargs)
 
-    class Meta:
-        abstract = True
 
 class SimpleSearchableModel(models.Model):
 
