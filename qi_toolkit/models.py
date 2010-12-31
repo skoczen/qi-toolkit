@@ -3,8 +3,8 @@ import re
 import datetime
 
 class TimestampModelMixin(models.Model):
-    created_at = models.DateField(blank=True, null=True)
-    modified_at = models.DateField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    modified_at = models.DateTimeField(blank=True, null=True)
     
     def save(self, *args, **kwargs):
         self.modified_at = datetime.datetime.now()
