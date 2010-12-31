@@ -2,7 +2,7 @@ from django.db import models
 import re
 import datetime
 
-class TimestampModelMixin(object):
+class TimestampModelMixin(models.Model):
     created_at = models.DateField(blank=True, null=True)
     modified_at = models.DateField(blank=True, null=True)
     
