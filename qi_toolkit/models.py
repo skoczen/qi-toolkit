@@ -12,7 +12,9 @@ class TimestampModelMixin(models.Model):
             self.created_at = self.modified_at
         super(SimpleSearchableModel,self).save(*args, **kwargs)
 
-
+    class Meta:
+        abstract = True
+            
 class SimpleSearchableModel(models.Model):
 
     qi_simple_searchable_search_field = models.CharField(max_length=255)
