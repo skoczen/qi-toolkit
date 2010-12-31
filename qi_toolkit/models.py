@@ -10,7 +10,7 @@ class TimestampModelMixin(models.Model):
         self.modified_at = datetime.datetime.now()
         if not self.id:
             self.created_at = self.modified_at
-        super(SimpleSearchableModel,self).save(*args, **kwargs)
+        super(TimestampModelMixin,self).save(*args, **kwargs)
 
     class Meta:
         abstract = True
