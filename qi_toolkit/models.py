@@ -1,5 +1,19 @@
 from django.db import models
 import re
+import datetime
+
+class TimestampModelMixin(models.Model):
+    created_at = models.DateField(blank=True, null=True)
+    modified_at = models.DateField(blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        self.modified_at = datetime.datetime.now()
+        if not self.id:
+            self.created_at = self.modified_at
+        super(SimpleSearchableModel,self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
 
 class SimpleSearchableModel(models.Model):
 

@@ -200,6 +200,7 @@ def setup_server():
     
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
     magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
+    setup_project_symlinks()
     install_requirements()
     if not env.is_local:
         try:
@@ -235,6 +236,9 @@ def setup_django_admin_media_symlinks():
 
 def setup_cms_symlinks():
     magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)s../../../src/django-cms/cms/media/cms .")
+
+def setup_project_symlinks():
+    pass
 
 def pull():
     "Updates the repository."
