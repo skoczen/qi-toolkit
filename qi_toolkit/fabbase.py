@@ -358,13 +358,10 @@ def backup_daily():
         magic_run("cd %(backup_dir)s; rm -rf cur_images")
         magic_run("mv %(backup_dir)s/cur_images2.zip cur_images.zip")
         
-        try:
-            magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)")
-        except:
-            pass
+        magic_fail_tolerant_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)")
 
     else: 
-        print "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
+        raise "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
 
 def backup_weekly():
     magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip")
@@ -374,7 +371,7 @@ def backup_weekly():
     magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip")
     magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip")
     
-    magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
+    magic_fail_tolerant_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
     
 def backup_monthly():
     magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/monthly/month-`date +%F`.zip")
