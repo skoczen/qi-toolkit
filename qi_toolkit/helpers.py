@@ -1,6 +1,8 @@
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+
 def render_to(template):
+    from django.shortcuts import render_to_response
+    from django.template import RequestContext
+    
     """
     Decorator for Django views that sends returned dict to render_to_response function
     with given template and RequestContext as context instance.
@@ -34,14 +36,16 @@ def print_exception():
     print "################################################################"
 
 
-from django.http import HttpResponse
-from django.utils import simplejson
-from django.core.mail import mail_admins
-from django.utils.translation import ugettext as _
-import sys
+
 
 
 def json_view(func):
+    from django.http import HttpResponse
+    from django.utils import simplejson
+    from django.core.mail import mail_admins
+    from django.utils.translation import ugettext as _
+    import sys
+    
     def wrap(request, *a, **kw):
         response = None
         try:
