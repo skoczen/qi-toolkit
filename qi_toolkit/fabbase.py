@@ -67,6 +67,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.staging_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging_static" % env
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
+    env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/"
 
     env.update(overrides)
 
@@ -107,30 +108,33 @@ def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, over
 
 def live():
     env.python = "python2.6"
+    env.role = "live"
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
     env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
-    env.backup_file_path = "%(git_path)s/db/full_backup.json" % env
+    env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
     env.media_path = env.live_static_dir
     env.pull_branch = env.live_branch
     
     
 def staging():
     env.python = "python2.6"
+    env.role = "staging"
     env.hosts = env.staging_hosts
     env.base_path = env.staging_app_dir
     env.git_path = "%(staging_app_dir)s/%(project_name)s.git" % env
     env.media_path = env.staging_static_dir
-    env.backup_file_path = "%(git_path)s/db/full_backup.json" % env    
+    env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
     env.pull_branch = env.live_branch
     env.virtualenv_name = env.staging_virtualenv_name
     env.work_on = "workon %(virtualenv_name)s; " % env
 
 def localhost():
     env.hosts = ['localhost']
+    env.role = "localhost"    
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
     env.git_path = env.base_path
-    env.backup_file_path = "%(git_path)s/db/full_backup.json" % env
+    env.backup_dir = "%(local_working_path)s/db" % env
     env.pull_branch = env.working_branch
     env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.is_local = True
@@ -201,6 +205,7 @@ def setup_server():
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
     magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
     setup_project_symlinks()
+    setup_backup_dir_and_cron()
     install_requirements()
     if not env.is_local:
         try:
@@ -276,11 +281,99 @@ def start():
     "Start the wsgi server."
     magic_run("%(base_path)s/apache2/bin/start;")
 
-def backup():
-    "Backup with a data dump."
-    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(backup_file_path)s")
-    if env.is_local:
-        magic_run("cp %(backup_file_path)s %(git_path)s/db/all_data.json")
+def backup_for_deploy():
+    "Backup before deploys."
+    import os.path
+    env.current_backup_file = "%(backup_dir)s/currentDeployBackup.json" % env    
+    if not os.path.isfile(env.current_backup_file):    
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
+        magic_run("zip -r9q %(backup_dir)s/deploys/`date+%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
+        if env.is_local:
+            magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
+    else:
+        raise "Deploy backup failed - previous deploy did not finish cleanly."
+
+def setup_backup_dir_and_cron():
+    # requires fabric and python-crontab installed on the target
+    try:
+        magic_run ("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;")
+    except:
+        pass
+    try:
+        from crontab import CronTab
+        tab = CronTab()
+        daily_command = "%(work_on)s; fab %(role)s backup_daily > /dev/null 2>&1" % env
+        weekly_command = "%(work_on)s; fab %(role)s backup_weekly > /dev/null 2>&1" % env
+        monthly_command = "%(work_on)s; fab %(role)s backup_monthly > /dev/null 2>&1" % env
+        changed = False
+        if len(tab.find_command(daily_command)) == 0:
+            daily_tab = tab.new(command=daily_command)
+            daily_tab.hour(1)
+            daily_tab.minute(0)
+            changed = True
+        if len(tab.find_command(weekly_command)) == 0:
+            daily_tab = tab.new(command=weekly_command)
+            daily_tab.dow(1)
+            daily_tab.hour(2)
+            daily_tab.minute(0)
+            changed = True
+        if len(tab.find_command(monthly_command)) == 0:
+            daily_tab = tab.new(command=monthly_command)
+            daily_tab.dom(1)
+            daily_tab.hour(3)
+            daily_tab.minute(0)
+            changed = True
+        if changed:
+            tab.write()
+    except:
+        pass
+
+def backup_daily():
+
+    import os.path
+    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
+    if not os.path.isfile(env.current_backup_file):
+        magic_run("%(work_on)s; cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
+
+        magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip")
+        magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip")
+        magic_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip")
+        magic_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip")
+        magic_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip")
+        magic_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip")
+        magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip")
+        magic_run("zip -r9q %(backup_dir)s/days-ago-0.zip %(current_backup_file)s ")
+        magic_run("rm %(current_backup_file)s")
+
+        magic_run("cd %(backup_dir)s; mkdir cur_images;")
+        magic_run("cp -R %(media_path)s/cms %(backup_dir)s/cur_images/")
+        magic_run("cp -R %(media_path)s/images %(backup_dir)s/cur_images/")
+        magic_run("cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/")
+        magic_run("cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images")
+        magic_run("cd %(backup_dir)s; rm -rf cur_images")
+        magic_run("mv %(backup_dir)s/cur_images2.zip cur_images.zip")
+        
+        try:
+            magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)")
+        except:
+            pass
+
+    else: 
+        print "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
+
+def backup_weekly():
+    magic_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip")
+    magic_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip")
+    magic_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip")
+    magic_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip")
+    magic_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip")
+    magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip")
+    
+    magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
+    
+def backup_monthly():
+    magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/monthly/month-`date +%F`.zip")
+
 
 def migrate():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
@@ -289,7 +382,7 @@ def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
 
 def deploy():
-    backup()
+    backup_for_deploy()
     pull()
     install_requirements()
     migrate()
