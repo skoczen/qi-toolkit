@@ -347,7 +347,7 @@ def backup_daily():
     import os.path
     env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
     if not os.path.isfile(env.current_backup_file):
-        magic_run("%(work_on)s; cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
 
         magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip")
         magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip")
