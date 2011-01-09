@@ -67,7 +67,9 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.staging_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging_static" % env
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
+    env.backup_root = "%(webfaction_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/"
+
 
     env.update(overrides)
 
@@ -295,6 +297,10 @@ def backup_for_deploy():
 
 def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
+    try:
+        magic_run ("mkdir %(backup_root)s")
+    except:
+        pass
     try:
         magic_run ("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;")
     except:
