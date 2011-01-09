@@ -2,6 +2,13 @@ from django.db import models
 import re
 import datetime
 
+def resave_searchable_models():
+    for model in models.get_models():
+        if SimpleSearchableModel in model.__bases__:
+            for o in model.objects.all():
+                o.save()
+    
+
 class TimestampModelMixin(models.Model):
     created_at = models.DateTimeField(blank=True, null=True, editable=False)
     modified_at = models.DateTimeField(blank=True, null=True, editable=False)
