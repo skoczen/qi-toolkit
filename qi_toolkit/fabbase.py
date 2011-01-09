@@ -308,26 +308,27 @@ def setup_backup_dir_and_cron():
     try:
         from crontab import CronTab
         tab = CronTab()
-        daily_command = "%(work_on)s; fab %(role)s backup_daily > /dev/null 2>&1" % env
-        weekly_command = "%(work_on)s; fab %(role)s backup_weekly > /dev/null 2>&1" % env
-        monthly_command = "%(work_on)s; fab %(role)s backup_monthly > /dev/null 2>&1" % env
+        print tab
+        daily_command = "%(work_on)s fab %(role)s backup_daily > /dev/null 2>&1" % env
+        weekly_command = "%(work_on)s fab %(role)s backup_weekly > /dev/null 2>&1" % env
+        monthly_command = "%(work_on)s fab %(role)s backup_monthly > /dev/null 2>&1" % env
         changed = False
         if len(tab.find_command(daily_command)) == 0:
             daily_tab = tab.new(command=daily_command)
-            daily_tab.hour(1)
-            daily_tab.minute(0)
+            daily_tab.hour().on(1)
+            daily_tab.minute().on(0)
             changed = True
         if len(tab.find_command(weekly_command)) == 0:
-            daily_tab = tab.new(command=weekly_command)
-            daily_tab.dow(1)
-            daily_tab.hour(2)
-            daily_tab.minute(0)
+            weekly_tab = tab.new(command=weekly_command)
+            weekly_tab.dow().on(1)
+            weekly_tab.hour().on(2)
+            weekly_tab.minute().on(0)
             changed = True
         if len(tab.find_command(monthly_command)) == 0:
-            daily_tab = tab.new(command=monthly_command)
-            daily_tab.dom(1)
-            daily_tab.hour(3)
-            daily_tab.minute(0)
+            monthly_tab = tab.new(command=monthly_command)
+            monthly_tab.dom().on(1)
+            monthly_tab.hour().on(3)
+            monthly_tab.minute().on(0)
             changed = True
         if changed:
             tab.write()
