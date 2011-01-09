@@ -156,9 +156,6 @@ def safe(function_call, *args, **kwargs):
     except:
         pass
 
-def magic_fail_tolerant_run(function_call):
-    return safe(magic_run(function_call))
-
 # Custom Config End
 def magic_run(function_call):
     if env.dry_run:
@@ -203,7 +200,7 @@ def setup_server():
     magic_run("mkvirtualenv %(virtualenv_name)s;")
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
 
-    magic_fail_tolerant_run ("mkdir %(base_path)s")
+    safe(magic_run("mkdir %(base_path)s"))
 
     magic_run("git clone %(git_origin)s %(git_path)s")
     
@@ -213,7 +210,7 @@ def setup_server():
     setup_backup_dir_and_cron()
     install_requirements()
     if not env.is_local:
-        magic_fail_tolerant_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi");
+        safe(magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi"))
 
         # httpd.conf
         magic_run("mv %(base_path)s/apache2/conf/httpd.conf %(base_path)s/apache2/conf/httpd.conf.bak")
@@ -298,9 +295,9 @@ def backup_for_deploy():
 
 def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
-    magic_fail_tolerant_run("mkdir %(backup_root)s")
-    magic_fail_tolerant_run("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;")
-    magic_fail_tolerant_run("%(work_on)s fab %(role)s setup_crontab")
+    safe(magic_run("mkdir %(backup_root)s"))
+    safe(magic_run("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;"))
+    safe(magic_run("%(work_on)s fab %(role)s setup_crontab"))
         
 def setup_crontab():
     try:
@@ -340,13 +337,13 @@ def backup_daily():
     if not os.path.isfile(env.current_backup_file):
         magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
 
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip")
-        magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip")
+        safe(magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip"))
+        safe(magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip"))
         magic_run("zip -r9q %(backup_dir)s/days-ago-0.zip %(current_backup_file)s ")
         magic_run("rm %(current_backup_file)s")
 
@@ -358,20 +355,20 @@ def backup_daily():
         magic_run("cd %(backup_dir)s; rm -rf cur_images")
         magic_run("mv %(backup_dir)s/cur_images2.zip cur_images.zip")
         
-        magic_fail_tolerant_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)")
+        safe(magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)"))
 
     else: 
         raise "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
 
 def backup_weekly():
-    magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip")
-    magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip")
-    magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip")
-    magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip")
-    magic_fail_tolerant_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip")
-    magic_fail_tolerant_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip")
-    
-    magic_fail_tolerant_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
+    safe(magic_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip"))
+    safe(magic_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip"))
+    safe(magic_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip"))
+    safe(magic_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip"))
+    safe(magic_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip"))
+    safe(magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip"))
+
+    safe(magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s"))
     
 def backup_monthly():
     magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/monthly/month-`date +%F`.zip")
