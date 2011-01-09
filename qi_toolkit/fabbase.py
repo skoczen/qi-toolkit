@@ -34,6 +34,7 @@
 
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
+from helpers import print_exception
 
 def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
     global env
@@ -298,17 +299,22 @@ def backup_for_deploy():
 def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
     try:
-        magic_run ("mkdir %(backup_root)s")
+        magic_run("mkdir %(backup_root)s")
     except:
         pass
     try:
-        magic_run ("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;")
+        magic_run("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;")
     except:
         pass
+    try:
+        magic_run("%(work_on)s fab %(role)s setup_crontab")
+    except:
+        pass
+        
+def setup_crontab():
     try:
         from crontab import CronTab
         tab = CronTab()
-        print tab
         daily_command = "%(work_on)s fab %(role)s backup_daily > /dev/null 2>&1" % env
         weekly_command = "%(work_on)s fab %(role)s backup_weekly > /dev/null 2>&1" % env
         monthly_command = "%(work_on)s fab %(role)s backup_monthly > /dev/null 2>&1" % env
@@ -333,10 +339,11 @@ def setup_backup_dir_and_cron():
         if changed:
             tab.write()
     except:
+        print_exception()
         pass
+    
 
 def backup_daily():
-
     import os.path
     env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
     if not os.path.isfile(env.current_backup_file):
