@@ -175,11 +175,8 @@ def magic_run(function_call):
             return run(function_call % env)
 
 def setup_server():
-    try:
-        safe_magic_run("mkdir %(webfaction_home)s/src")
-        magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
-    except:
-        pass
+    safe_magic_run("mkdir %(webfaction_home)s/src")
+    safe_magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
 
     try:
         magic_run("git --version")
@@ -193,14 +190,8 @@ def setup_server():
     try:
         magic_run("pip")
     except:
-        try:
-            safe_magic_run("mkdir %(webfaction_home)s/lib:")
-        except:
-            pass
-        try:
-            safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
-        except:
-            pass
+        safe_magic_run("mkdir %(webfaction_home)s/lib:")
+        safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
         magic_run("easy_install-2.6 pip")
 
     magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
@@ -209,7 +200,6 @@ def setup_server():
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
 
     safe_magic_run("mkdir %(base_path)s")
-
     magic_run("git clone %(git_origin)s %(git_path)s")
     
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
