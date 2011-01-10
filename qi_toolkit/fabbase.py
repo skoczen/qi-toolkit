@@ -34,6 +34,7 @@
 
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
+import fabric
 from helpers import print_exception
 
 def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
@@ -69,13 +70,13 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
     env.backup_root = "%(webfaction_home)s/backups" % env
-    env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/"
+    env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
 
     env.update(overrides)
 
 def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, overrides={}):
-    raise "Not Yet Implemented"
+    raise  Exception, "Not Yet Implemented"
     global env
     env.dry_run = False    
     env.project_name = project_name
@@ -156,6 +157,13 @@ def safe(function_call, *args, **kwargs):
     except:
         pass
 
+def safe_magic_run(function_call, *args, **kwargs):
+    try:
+        ret = magic_run(function_call, *args, **kwargs)
+        return ret
+    except:
+        pass    
+
 # Custom Config End
 def magic_run(function_call):
     if env.dry_run:
@@ -168,7 +176,7 @@ def magic_run(function_call):
 
 def setup_server():
     try:
-        safe(magic_run("mkdir %(webfaction_home)s/src"))
+        safe_magic_run("mkdir %(webfaction_home)s/src")
         magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
     except:
         pass
@@ -186,21 +194,21 @@ def setup_server():
         magic_run("pip")
     except:
         try:
-            safe(magic_run("mkdir %(webfaction_home)s/lib:"))
+            safe_magic_run("mkdir %(webfaction_home)s/lib:")
         except:
             pass
         try:
-            safe(magic_run("mkdir %(webfaction_home)s/lib/python2.6"))
+            safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
         except:
             pass
         magic_run("easy_install-2.6 pip")
 
     magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
-    safe(magic_run("mkdir %(webfaction_home)s/.virtualenvs"))    
+    safe_magic_run("mkdir %(webfaction_home)s/.virtualenvs")
     magic_run("mkvirtualenv %(virtualenv_name)s;")
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
 
-    safe(magic_run("mkdir %(base_path)s"))
+    safe_magic_run("mkdir %(base_path)s")
 
     magic_run("git clone %(git_origin)s %(git_path)s")
     
@@ -210,7 +218,7 @@ def setup_server():
     setup_backup_dir_and_cron()
     install_requirements()
     if not env.is_local:
-        safe(magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi"))
+        safe_magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi")
 
         # httpd.conf
         magic_run("mv %(base_path)s/apache2/conf/httpd.conf %(base_path)s/apache2/conf/httpd.conf.bak")
@@ -287,17 +295,17 @@ def backup_for_deploy():
     env.current_backup_file = "%(backup_dir)s/currentDeployBackup.json" % env    
     if not os.path.isfile(env.current_backup_file):    
         magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
-        magic_run("zip -r9q %(backup_dir)s/deploys/`date+%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
+        magic_run("zip -r9q %(backup_dir)s/pre_deploy_`date +%%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
         if env.is_local:
             magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
     else:
-        raise "Deploy backup failed - previous deploy did not finish cleanly."
+        raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
 
 def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
-    safe(magic_run("mkdir %(backup_root)s"))
-    safe(magic_run("mkdir %(backup_dir)s; mkdir %(backup_dir)s/monthly; mkdir %(backup_dir)s/deploys;"))
-    safe(magic_run("%(work_on)s fab %(role)s setup_crontab"))
+    safe_magic_run("mkdir %(backup_root)s")
+    safe_magic_run("mkdir %(backup_dir)s")
+    safe_magic_run("%(work_on)s fab %(role)s setup_crontab")
         
 def setup_crontab():
     try:
@@ -332,18 +340,17 @@ def setup_crontab():
     
 
 def backup_daily():
-    import os.path
     env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
-    if not os.path.isfile(env.current_backup_file):
+    if not fabric.contrib.files.exists(env.current_backup_file):
         magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
 
-        safe(magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip"))
-        safe(magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip"))
+        safe_magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip")
+        safe_magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip")
         magic_run("zip -r9q %(backup_dir)s/days-ago-0.zip %(current_backup_file)s ")
         magic_run("rm %(current_backup_file)s")
 
@@ -353,25 +360,25 @@ def backup_daily():
         magic_run("cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/")
         magic_run("cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images")
         magic_run("cd %(backup_dir)s; rm -rf cur_images")
-        magic_run("mv %(backup_dir)s/cur_images2.zip cur_images.zip")
+        magic_run("mv %(backup_dir)s/cur_images2.zip %(backup_dir)s/cur_images.zip")
         
-        safe(magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s)"))
+        safe_magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s")
 
     else: 
-        raise "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
+        raise Exception, "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
 
 def backup_weekly():
-    safe(magic_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip"))
-    safe(magic_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip"))
-    safe(magic_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip"))
-    safe(magic_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip"))
-    safe(magic_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip"))
-    safe(magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip"))
+    safe_magic_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip")
+    safe_magic_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip")
+    safe_magic_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip")
+    safe_magic_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip")
+    safe_magic_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip")
+    safe_magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip")
 
-    safe(magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s"))
+    safe_magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
     
 def backup_monthly():
-    magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/monthly/month-`date +%F`.zip")
+    magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip")
 
 
 def migrate():
