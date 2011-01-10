@@ -215,8 +215,8 @@ def setup_server():
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
     magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
     setup_project_symlinks()
-    setup_backup_dir_and_cron()
     install_requirements()
+    setup_backup_dir_and_cron()
     if not env.is_local:
         safe_magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi")
 
