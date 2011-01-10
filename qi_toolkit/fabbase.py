@@ -190,7 +190,7 @@ def setup_server():
     try:
         magic_run("pip")
     except:
-        safe_magic_run("mkdir %(webfaction_home)s/lib:")
+        safe_magic_run("mkdir %(webfaction_home)s/lib")
         safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
         magic_run("easy_install-2.6 pip")
 
