@@ -208,6 +208,7 @@ def setup_server():
     safe_magic_run("mkdir %(webfaction_home)s/.virtualenvs")
     magic_run("mkvirtualenv %(virtualenv_name)s;")
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
+    magic_run("echo 'export DJANGO_SETTINGS_MODULE=\"envs.%(role)s\"' >> %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")    
 
     safe_magic_run("mkdir %(base_path)s")
 
