@@ -131,6 +131,7 @@ def staging():
     env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
     env.pull_branch = env.live_branch
     env.virtualenv_name = env.staging_virtualenv_name
+    env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
 
 def localhost():
@@ -175,8 +176,11 @@ def magic_run(function_call):
             return run(function_call % env)
 
 def setup_server():
-    safe_magic_run("mkdir %(webfaction_home)s/src")
-    safe_magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
+    try:
+        safe_magic_run("mkdir %(webfaction_home)s/src")
+        magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
+    except:
+        pass
 
     try:
         magic_run("git --version")
@@ -188,10 +192,16 @@ def setup_server():
         magic_run("echo \"export PATH=$PATH:/%(webfaction_home)s/git/bin/\" >> %(webfaction_home)s/.bashrc")
 
     try:
-        magic_run("pip")
+        magic_run("pip --version")
     except:
-        safe_magic_run("mkdir %(webfaction_home)s/lib")
-        safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
+        try:
+            safe_magic_run("mkdir %(webfaction_home)s/lib:")
+        except:
+            pass
+        try:
+            safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
+        except:
+            pass
         magic_run("easy_install-2.6 pip")
 
     magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
@@ -200,13 +210,14 @@ def setup_server():
     magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
 
     safe_magic_run("mkdir %(base_path)s")
+
     magic_run("git clone %(git_origin)s %(git_path)s")
     
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
     magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
     setup_project_symlinks()
-    install_requirements()
     setup_backup_dir_and_cron()
+    install_requirements()
     if not env.is_local:
         safe_magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi")
 
@@ -407,4 +418,3 @@ def ssh_auth_me():
 
     sudo("mkdir ~/.ssh; chmod 700 ~/.ssh; touch ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys;")
     sudo("echo '%s' >> ~/.ssh/authorized_keys" % (my_key))
-
