@@ -8,8 +8,8 @@ def add_env_to_request(request):
         return {}
 
 def add_favicon_to_request(request):
-    "Adds the FAVICON context to the template"
+    "Adds the FAVICON_URL context to the template"
     try:
-        return {'FAVICON' : settings.FAVICON }
+        return {'FAVICON_URL' : settings.FAVICON_URL }
     except:
         return {}    
