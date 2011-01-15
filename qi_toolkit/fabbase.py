@@ -128,7 +128,7 @@ def staging():
     env.base_path = env.staging_app_dir
     env.git_path = "%(staging_app_dir)s/%(project_name)s.git" % env
     env.media_path = env.staging_static_dir
-    env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
+    env.backup_dir = "%(webfaction_home)s/backups/staging_%(project_name)s" % env
     env.pull_branch = env.live_branch
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
