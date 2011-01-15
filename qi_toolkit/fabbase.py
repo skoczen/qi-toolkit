@@ -232,7 +232,7 @@ def setup_server():
         magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
         magic_run("echo 'from django.core.handlers.wsgi import WSGIHandler' >> %(base_path)s/%(project_name)s.wsgi")
         magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.settings'\" >> %(base_path)s/%(project_name)s.wsgi")
+        magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.envs.%(role)s'\" >> %(base_path)s/%(project_name)s.wsgi")
         magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
 
     restart()
