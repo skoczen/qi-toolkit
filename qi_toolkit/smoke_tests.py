@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.db import transaction
 import re
 
-title_re = re.compile("<title>.*?<\/title>",re.I)
+title_re = re.compile("<title>.+?<\/title>",re.I)
 
 DEFAULT_SMOKE_TEST_OPTIONS = {
     'client'            : Client(),
