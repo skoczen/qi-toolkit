@@ -2,6 +2,9 @@ from django.test.client import Client
 from nose.tools import istest, nottest, assert_true
 from django.core.urlresolvers import reverse
 from django.db import transaction
+import re
+
+title_re = re.compile("<title>.*?<\/title>",re.I)
 
 DEFAULT_SMOKE_TEST_OPTIONS = {
     'client'            : Client(),
@@ -11,15 +14,16 @@ DEFAULT_SMOKE_TEST_OPTIONS = {
     'data'              : {},
     'method'            : "GET",
     'verbose'           : True,
+    'check_title'       : False,
 }
 
 class Config(object):
     pass
 
-@nottest 
+@nottest
 @transaction.commit_manually
 def smoke_test(url_name, *args, **kwargs):
-    this.__test__ = True
+    __test__ = True
     try:
         config = Config()
         config.__dict__.update(DEFAULT_SMOKE_TEST_OPTIONS)
@@ -49,7 +53,17 @@ def smoke_test(url_name, *args, **kwargs):
             if not response.status_code == config.status_code:
                 fail_error = "Status code fail. Expected %s.  Got %s" %(response.status_code, config.status_code)
             assert_true(response.status_code == config.status_code)
+        
+        if config.check_title:
+            fail_error = "Page is missing a title. %s" % (reverse_url)
+            assert title_re.search(response.content) != None
+        
+        transaction.rollback()
+
     except:
-        assert 1==0, fail_error
-        pass
-    transaction.rollback()
+        print fail_error
+        from qi_toolkit.helpers import print_exception
+        print_exception()
+        transaction.rollback()
+        assert 1==0
+
