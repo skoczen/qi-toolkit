@@ -19,6 +19,7 @@ class Config(object):
 @nottest 
 @transaction.commit_manually
 def smoke_test(url_name, *args, **kwargs):
+    this.__test__ = True
     try:
         config = Config()
         config.__dict__.update(DEFAULT_SMOKE_TEST_OPTIONS)
