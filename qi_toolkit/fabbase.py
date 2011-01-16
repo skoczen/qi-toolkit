@@ -59,6 +59,9 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.production_hosts = ['%(webfaction_host)s' % env] 
     env.webfaction_home = "/home/%(webfaction_user)s" % env
     env.git_origin = "%(webfaction_user)s@%(webfaction_host)s:%(webfaction_home)s/git-root/%(project_name)s.git" % env
+    env.daily_backup_script_name = "daily_backup.sh"
+    env.weekly_backup_script_name = "weekly_backup.sh"
+    env.monthly_backup_script_name = "monthly_backup.sh"
 
     env.staging_hosts = env.production_hosts
     env.virtualenv_name = env.project_name
@@ -307,15 +310,19 @@ def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
     safe_magic_run("mkdir %(backup_root)s")
     safe_magic_run("mkdir %(backup_dir)s")
+    safe_magic_run("echo '%(daily_backup_script)s' > %(backup_dir)s/%(daily_backup_script_name)s")
+    safe_magic_run("echo '%(weekly_backup_script)s' > %(backup_dir)s/%(weekly_backup_script_name)s")
+    safe_magic_run("echo '%(monthly_backup_script)s' > %(backup_dir)s/%(monthly_backup_script_name)s")
+        
     safe_magic_run("%(work_on)s fab %(role)s setup_crontab")
         
 def setup_crontab():
     try:
         from crontab import CronTab
         tab = CronTab()
-        daily_command = "%(work_on)s fab %(role)s backup_daily > /dev/null 2>&1" % env
-        weekly_command = "%(work_on)s fab %(role)s backup_weekly > /dev/null 2>&1" % env
-        monthly_command = "%(work_on)s fab %(role)s backup_monthly > /dev/null 2>&1" % env
+        daily_command = "%(backup_dir)s/%(daily_backup_script_name)s > /dev/null 2>&1" % env
+        weekly_command = "%(backup_dir)s/%(weekly_backup_script_name)s > /dev/null 2>&1" % env
+        monthly_command = "%(backup_dir)s/%(monthly_backup_script_name)s > /dev/null 2>&1" % env
         changed = False
         if len(tab.find_command(daily_command)) == 0:
             daily_tab = tab.new(command=daily_command)
@@ -344,43 +351,65 @@ def setup_crontab():
 def backup_daily():
     env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
     if not fabric.contrib.files.exists(env.current_backup_file):
-        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
-
-        safe_magic_run("mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip")
-        safe_magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip")
-        magic_run("zip -r9q %(backup_dir)s/days-ago-0.zip %(current_backup_file)s ")
-        magic_run("rm %(current_backup_file)s")
-
-        magic_run("cd %(backup_dir)s; mkdir cur_images;")
-        magic_run("cp -R %(media_path)s/cms %(backup_dir)s/cur_images/")
-        magic_run("cp -R %(media_path)s/images %(backup_dir)s/cur_images/")
-        magic_run("cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/")
-        magic_run("cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images")
-        magic_run("cd %(backup_dir)s; rm -rf cur_images")
-        magic_run("mv %(backup_dir)s/cur_images2.zip %(backup_dir)s/cur_images.zip")
-        
-        safe_magic_run("scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s")
-
+        magic_run("%(backup_dir)s/%(daily_backup_script_name)s")
     else: 
         raise Exception, "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
 
-def backup_weekly():
-    safe_magic_run("mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip")
-    safe_magic_run("mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip")
-    safe_magic_run("mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip")
-    safe_magic_run("mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip")
-    safe_magic_run("mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip")
-    safe_magic_run("mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip")
 
-    safe_magic_run("cd %(backup_dir)s; scp * %(offsite_backup_dir)s")
+def daily_backup_script():    
+    script = """#!/bin/bash
+%(work_on)s cd %(project_name)s; 
+%(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s
+
+mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip
+mv %(backup_dir)s/days-ago-5.zip %(backup_dir)s/days-ago-6.zip
+mv %(backup_dir)s/days-ago-4.zip %(backup_dir)s/days-ago-5.zip
+mv %(backup_dir)s/days-ago-3.zip %(backup_dir)s/days-ago-4.zip
+mv %(backup_dir)s/days-ago-2.zip %(backup_dir)s/days-ago-3.zip
+mv %(backup_dir)s/days-ago-1.zip %(backup_dir)s/days-ago-2.zip
+mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/days-ago-1.zip
+zip -r9q %(backup_dir)s/days-ago-0.zip %(current_backup_file)s 
+rm %(current_backup_file)s
+
+cd %(backup_dir)s; mkdir cur_images;
+cp -R %(media_path)s/cms %(backup_dir)s/cur_images/
+cp -R %(media_path)s/images %(backup_dir)s/cur_images/
+cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/
+cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images
+cd %(backup_dir)s; rm -rf cur_images
+mv %(backup_dir)s/cur_images2.zip %(backup_dir)s/cur_images.zip
+        
+scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s
+""" % env
+    script = script.replace("\n","\\n")
+    return script
+
+def backup_weekly():
+    magic_run("%(backup_dir)s/%(weekly_backup_script_name)s")
+    
+def weekly_backup_script():
+    script = """#!/bin/bash
+mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip
+mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip
+mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip
+mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip
+mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip
+mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip
+
+cd %(backup_dir)s; scp * %(offsite_backup_dir)s
+""" % env
+    script = script.replace("\n","\\n")
+    return script
     
 def backup_monthly():
-    magic_run("cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip")
+    magic_run("%(backup_dir)s/%(monthly_backup_script_name)s")
+
+def monthly_backup_script():
+    script = """#!/bin/bash
+cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip
+""" % env
+    script = script.replace("\n","\\n")
+    return script
 
 
 def migrate():
