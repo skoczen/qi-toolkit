@@ -112,6 +112,12 @@ def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, over
 
     env.update(overrides)
 
+def setup_backup_env_webfaction():
+    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
+    env.daily_backup_script = daily_backup_script()
+    env.weekly_backup_script = weekly_backup_script()
+    env.monthly_backup_script = monthly_backup_script()
+
 def live():
     env.python = "python2.6"
     env.role = "live"
@@ -121,7 +127,7 @@ def live():
     env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
     env.media_path = env.live_static_dir
     env.pull_branch = env.live_branch
-    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env    
+    setup_backup_env_webfaction()
     
 def staging():
     env.python = "python2.6"
@@ -135,7 +141,7 @@ def staging():
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
-    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
+    setup_backup_env_webfaction()
 
 def localhost():
     env.hosts = ['localhost']
@@ -147,7 +153,7 @@ def localhost():
     env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.is_local = True
     env.media_path = "%(base_path)s/%(media_dir)s" % env
-    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
+    setup_backup_env_webfaction()
 
 env.roledefs = {
     'live': [live],
@@ -217,7 +223,7 @@ def setup_server():
     safe_magic_run("mkdir %(base_path)s")
 
     magic_run("git clone %(git_origin)s %(git_path)s")
-    
+
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
     safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
     setup_project_symlinks()
@@ -241,7 +247,7 @@ def setup_server():
         magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
 
     restart()
-    
+
 def make_wsgi_file():
     magic_run("touch %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
@@ -249,7 +255,7 @@ def make_wsgi_file():
     magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.settings'\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
-    
+
 def setup_django_admin_media_symlinks():
     magic_run("cd %(media_path)s; touch admin; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
 
@@ -274,14 +280,14 @@ def ls():
 
 def restart():
     return reboot()
-    
+
 def reboot():
     "Reboot the wsgi server."
     if not env.is_local:
         magic_run("%(base_path)s/apache2/bin/stop;")
         magic_run("%(base_path)s/apache2/bin/start;")
-        
-    
+
+
 def stop():
     "Stop the wsgi server."
     if not env.is_local:    
@@ -311,12 +317,15 @@ def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
     safe_magic_run("mkdir %(backup_root)s")
     safe_magic_run("mkdir %(backup_dir)s")
-    safe_magic_run("echo '%(daily_backup_script)s' > %(backup_dir)s/%(daily_backup_script_name)s")
-    safe_magic_run("echo '%(weekly_backup_script)s' > %(backup_dir)s/%(weekly_backup_script_name)s")
-    safe_magic_run("echo '%(monthly_backup_script)s' > %(backup_dir)s/%(monthly_backup_script_name)s")
-        
-    safe_magic_run("%(work_on)s fab %(role)s setup_crontab")
-        
+    magic_run("echo '%(daily_backup_script)s' > %(backup_dir)s/%(daily_backup_script_name)s")
+    magic_run("echo '%(weekly_backup_script)s' > %(backup_dir)s/%(weekly_backup_script_name)s")
+    magic_run("echo '%(monthly_backup_script)s' > %(backup_dir)s/%(monthly_backup_script_name)s")
+    magic_run("chmod +x %(backup_dir)s/%(daily_backup_script_name)s")
+    magic_run("chmod +x %(backup_dir)s/%(weekly_backup_script_name)s")
+    magic_run("chmod +x %(backup_dir)s/%(monthly_backup_script_name)s")
+
+    magic_run("%(work_on)s fab %(role)s setup_crontab")
+
 def setup_crontab():
     try:
         from crontab import CronTab
@@ -347,7 +356,7 @@ def setup_crontab():
     except:
         print_exception()
         pass
-    
+
 
 def backup_daily():
     if not fabric.contrib.files.exists(env.current_backup_file):
@@ -358,6 +367,7 @@ def backup_daily():
 
 def daily_backup_script():    
     script = """#!/bin/bash
+source %(webfaction_home)s/bin/virtualenvwrapper.sh
 %(work_on)s cd %(project_name)s; 
 %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s
 
@@ -378,15 +388,15 @@ cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/
 cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images
 cd %(backup_dir)s; rm -rf cur_images
 mv %(backup_dir)s/cur_images2.zip %(backup_dir)s/cur_images.zip
-        
+
 scp %(backup_dir)s/cur_images.zip %(offsite_backup_dir)s
 """ % env
-    script = script.replace("\n","\\n")
+    # script = script.replace("\n","\\n")
     return script
 
 def backup_weekly():
     magic_run("%(backup_dir)s/%(weekly_backup_script_name)s")
-    
+
 def weekly_backup_script():
     script = """#!/bin/bash
 mv %(backup_dir)s/weeks-ago-4.zip %(backup_dir)s/weeks-ago-5.zip
@@ -398,9 +408,9 @@ mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip
 
 cd %(backup_dir)s; scp * %(offsite_backup_dir)s
 """ % env
-    script = script.replace("\n","\\n")
+    # script = script.replace("\n","\\n")
     return script
-    
+
 def backup_monthly():
     magic_run("%(backup_dir)s/%(monthly_backup_script_name)s")
 
@@ -408,7 +418,7 @@ def monthly_backup_script():
     script = """#!/bin/bash
 cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip
 """ % env
-    script = script.replace("\n","\\n")
+    # script = script.replace("\n","\\n")
     return script
 
 
