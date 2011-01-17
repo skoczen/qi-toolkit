@@ -75,7 +75,6 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.backup_root = "%(webfaction_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
-
     env.update(overrides)
 
 def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, overrides={}):
@@ -122,7 +121,7 @@ def live():
     env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
     env.media_path = env.live_static_dir
     env.pull_branch = env.live_branch
-    
+    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env    
     
 def staging():
     env.python = "python2.6"
@@ -136,6 +135,7 @@ def staging():
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
+    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
 
 def localhost():
     env.hosts = ['localhost']
@@ -147,6 +147,7 @@ def localhost():
     env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.is_local = True
     env.media_path = "%(base_path)s/%(media_dir)s" % env
+    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
 
 env.roledefs = {
     'live': [live],
@@ -349,7 +350,6 @@ def setup_crontab():
     
 
 def backup_daily():
-    env.current_backup_file = "%(backup_dir)s/currentBackup.json" % env
     if not fabric.contrib.files.exists(env.current_backup_file):
         magic_run("%(backup_dir)s/%(daily_backup_script_name)s")
     else: 
