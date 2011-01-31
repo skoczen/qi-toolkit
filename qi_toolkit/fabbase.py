@@ -225,7 +225,7 @@ def setup_server():
     magic_run("git clone %(git_origin)s %(git_path)s")
 
     magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
-    safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
+    setup_media_symlinks()
     setup_project_symlinks()
     setup_backup_dir_and_cron()
     install_requirements()
@@ -255,6 +255,9 @@ def make_wsgi_file():
     magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.settings'\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
+
+def setup_media_symlinks():
+    safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
 
 def setup_django_admin_media_symlinks():
     magic_run("cd %(media_path)s; touch admin; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
@@ -404,7 +407,7 @@ mv %(backup_dir)s/weeks-ago-3.zip %(backup_dir)s/weeks-ago-4.zip
 mv %(backup_dir)s/weeks-ago-2.zip %(backup_dir)s/weeks-ago-3.zip
 mv %(backup_dir)s/weeks-ago-1.zip %(backup_dir)s/weeks-ago-2.zip
 mv %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/weeks-ago-1.zip
-mv %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip
+cp %(backup_dir)s/days-ago-0.zip %(backup_dir)s/weeks-ago-0.zip
 
 cd %(backup_dir)s; scp * %(offsite_backup_dir)s
 """ % env

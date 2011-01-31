@@ -51,7 +51,7 @@ def smoke_test(url_name, *args, **kwargs):
                 print "%s" % (response.status_code)
 
             if not response.status_code == config.status_code:
-                fail_error = "Status code fail. Expected %s.  Got %s" %(response.status_code, config.status_code)
+                fail_error = "Status code fail. Expected %s.  Got %s" %(config.status_code, response.status_code)
             assert_true(response.status_code == config.status_code)
         
         if config.check_title:

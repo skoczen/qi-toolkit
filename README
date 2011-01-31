@@ -11,3 +11,5 @@ Includes:
 - robots.py - basic robots.txt handling
 - factory.py - a base factory class for common data generation.
 
+
+For the smoke tests, you'll need nose and djangosanetesting.
