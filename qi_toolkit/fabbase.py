@@ -36,6 +36,7 @@ from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 import fabric
 from helpers import print_exception
+import time
 
 def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
     global env
@@ -287,7 +288,13 @@ def restart():
 def reboot():
     "Reboot the wsgi server."
     if not env.is_local:
-        magic_run("%(base_path)s/apache2/bin/stop;")
+        shut_down = False
+        while not shut_down:
+            output = magic_run("%(base_path)s/apache2/bin/stop;")
+            shut_down = (output.find("Apache is not running") != -1)
+            if not shut_down:
+                time.sleep(1)
+
         magic_run("%(base_path)s/apache2/bin/start;")
 
 
