@@ -432,7 +432,7 @@ cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip
     return script
 
 def kill_pyc():
-    magic_run("%(workon)s cd %(git_path)s;find  -iname '*.pyc' -delete")
+    magic_run("%(work_on)s cd %(git_path)s;find  -iname '*.pyc' -delete")
 
 def migrate():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
