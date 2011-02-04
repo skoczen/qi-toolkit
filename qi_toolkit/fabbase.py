@@ -443,6 +443,7 @@ def syncdb():
 def deploy():
     backup_for_deploy()
     pull()
+    kill_pyc()
     install_requirements()
     migrate()
     reboot()
