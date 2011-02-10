@@ -24,7 +24,7 @@ class TimestampModelMixin(models.Model):
             
 class SimpleSearchableModel(models.Model):
 
-    qi_simple_searchable_search_field = models.TextField(db_index=True, editable=False, blank=True, null=True, unique=False)
+    qi_simple_searchable_search_field = models.TextField(editable=False, blank=True, null=True, unique=False) # db_index=True
 
     def save(self, *args, **kwargs):
         if hasattr(self, "search_fields"):
