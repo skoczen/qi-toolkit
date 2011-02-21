@@ -335,7 +335,10 @@ def setup_backup_dir_and_cron():
     magic_run("chmod +x %(backup_dir)s/%(weekly_backup_script_name)s")
     magic_run("chmod +x %(backup_dir)s/%(monthly_backup_script_name)s")
 
-    magic_run("%(work_on)s fab %(role)s setup_crontab")
+    try:
+        magic_run("%(work_on)s fab %(role)s setup_crontab")
+    except:
+        print "CRONTAB SETUP FAILED. Set up the crontabs manually."
 
 def setup_crontab():
     try:
