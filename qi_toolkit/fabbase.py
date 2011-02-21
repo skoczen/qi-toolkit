@@ -52,7 +52,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.is_local = False
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
-    env.webfaction_host = '%(webfaction_user)s@%(webfaction_user)s.webfactional.com' % env
+    env.webfaction_host = '%(webfaction_user)s.webfactional.com' % env
 
     env.update(initial_settings)
     
