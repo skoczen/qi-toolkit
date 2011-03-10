@@ -306,7 +306,7 @@ def stop():
 
 def install_requirements():
     "Install the requirements."
-    magic_run("%(work_on)s pip install -r requirements.txt ")
+    magic_run("%(work_on)s pip install --upgrade -r requirements.txt ")
 
 def start():
     "Start the wsgi server."

@@ -2,6 +2,7 @@ import random
 import lipsum
 import datetime
 import base64
+import decimal
 
 class QiFactory:
     @classmethod
@@ -45,6 +46,9 @@ class QiFactory:
     def rand_date(cls, start_year=1900, end_year=2011):
         return datetime.date(year=cls.rand_int(start_year,end_year),month=cls.rand_int(1,12), day=cls.rand_int(1,28))
 
+    @classmethod
+    def rand_currency(cls, start=0, end=100):
+        return decimal.Decimal(cls.rand_int(start=start*100,end=end*100)/100)
 
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
 "Maria", "Susan", "Margaret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", 
