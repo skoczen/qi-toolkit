@@ -2,7 +2,8 @@ import random
 import lipsum
 import datetime
 import base64
-import decimal
+from decimal import getcontext, Decimal
+getcontext().prec = 7
 
 class QiFactory:
     @classmethod
@@ -48,7 +49,7 @@ class QiFactory:
 
     @classmethod
     def rand_currency(cls, start=0, end=100):
-        return decimal.Decimal(cls.rand_int(start=start*100,end=end*100)/100)
+        return Decimal(cls.rand_int(start=start*100,end=end*100))/100
 
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
 "Maria", "Susan", "Margaret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", 
