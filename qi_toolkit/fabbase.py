@@ -35,7 +35,7 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 import fabric
-from helpers import print_exception
+from qi_toolkit.helpers import print_exception
 import time
 
 def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, overrides={}):
@@ -43,6 +43,8 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.dry_run = False
     env.project_name = project_name
     env.webfaction_user = webfaction_user
+    env.is_webfaction = True
+    env.is_centos = False
 
     # Custom Config Start
     env.parent = "origin"
@@ -54,62 +56,80 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.media_dir = "media"
     env.webfaction_host = '%(webfaction_user)s.webfactional.com' % env
 
+    env.production_hosts = [] 
+    env.staging_hosts = []
+    env.production_db_hosts = []
+
     env.update(initial_settings)
     
     # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
     env.production_hosts = ['%(webfaction_host)s' % env] 
-    env.webfaction_home = "/home/%(webfaction_user)s" % env
-    env.git_origin = "%(webfaction_user)s@%(webfaction_host)s:%(webfaction_home)s/git-root/%(project_name)s.git" % env
+    env.user_home = "/home/%(webfaction_user)s" % env
+    env.git_origin = "%(webfaction_user)s@%(webfaction_host)s:%(user_home)s/git-root/%(project_name)s.git" % env
     env.daily_backup_script_name = "daily_backup.sh"
     env.weekly_backup_script_name = "weekly_backup.sh"
     env.monthly_backup_script_name = "monthly_backup.sh"
 
     env.staging_hosts = env.production_hosts
     env.virtualenv_name = env.project_name
+
     env.staging_virtualenv_name = "staging_%(project_name)s" % env
-    env.live_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_live" % env
-    env.live_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_static" % env
-    env.staging_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging" % env
-    env.staging_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging_static" % env
-    env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
+    env.live_app_dir = "%(user_home)s/webapps/%(project_name)s_live" % env
+    env.live_static_dir = "%(user_home)s/webapps/%(project_name)s_static" % env
+    env.staging_app_dir = "%(user_home)s/webapps/%(project_name)s_staging" % env
+    env.staging_static_dir = "%(user_home)s/webapps/%(project_name)s_staging_static" % env
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
-    env.backup_root = "%(webfaction_home)s/backups" % env
+    env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
     env.update(overrides)
 
-def setup_env_rackspace(project_name, webfaction_user, initial_settings={}, overrides={}):
-    raise  Exception, "Not Yet Implemented"
+def setup_env_centos(project_name, system_user="root", initial_settings={}, overrides={}):
     global env
     env.dry_run = False    
     env.project_name = project_name
-    env.webfaction_user = webfaction_user
+    env.system_user = system_user
+    env.is_webfaction = False
+    env.is_centos = True
 
     # Custom Config Start
     env.parent = "origin"
     env.working_branch = "master"
     env.live_branch = "live"
+    env.staging_branch = "staging"
     env.python = "python"
     env.is_local = False
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
 
+    env.production_hosts = [] 
+    env.staging_hosts = []
+    env.production_db_hosts = []
+    env.staging_db_hosts = []
     env.update(initial_settings)
 
-    # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
-    env.production_hosts = ['%(webfaction_user)s.webfactional.com' % env] 
-    env.webfaction_home = "/home/%(webfaction_user)s" % env
-    env.git_origin = "%(webfaction_user)s@%(webfaction_user)s.webfactional.com:%(webfaction_home)s/git-root/%(project_name)s.git" % env
+    env.production_hosts = ["%(system_user)s@%(h)s" % {'system_user':env.system_user,'h':h} for h in env.production_hosts]
+    env.staging_hosts = ["%(system_user)s@%(h)s" % {'system_user':env.system_user,'h':h} for h in env.staging_hosts]
+    env.production_db_hosts = ["%(system_user)s@%(h)s" % {'system_user':env.system_user,'h':h} for h in env.production_db_hosts]
+    env.staging_db_hosts = ["%(system_user)s@%(h)s" % {'system_user':env.system_user,'h':h} for h in env.staging_db_hosts]
 
-    env.staging_hosts = env.production_hosts
+    if env.system_user == "root":
+        env.user_home = "/root"
+    else:
+        env.user_home = "/home/%(system_user)s" % env
+
     env.virtualenv_name = env.project_name
-    env.staging_virtualenv_name = "staging_%(project_name)s" % env
-    env.live_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_live" % env
-    env.live_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_static" % env
-    env.staging_app_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging" % env
-    env.staging_static_dir = "%(webfaction_home)s/webapps/%(project_name)s_staging_static" % env
-    env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
+    env.staging_virtualenv_name = env.virtualenv_name
+    env.live_app_dir = "/var/www"
+    env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
+    env.live_static_dir = "%(git_path)s/media" % env
+    env.staging_app_dir = env.live_app_dir
+    env.staging_static_dir = env.live_static_dir
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
+    env.backup_root = "%(user_home)s/backups" % env
+    env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
     env.update(overrides)
 
@@ -119,13 +139,14 @@ def setup_backup_env_webfaction():
     env.weekly_backup_script = weekly_backup_script()
     env.monthly_backup_script = monthly_backup_script()
 
+
 def live():
     env.python = "python2.6"
     env.role = "live"
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
     env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
-    env.backup_dir = "%(webfaction_home)s/backups/%(project_name)s" % env
+    env.backup_dir = "%(user_home)s/backups/%(project_name)s" % env
     env.media_path = env.live_static_dir
     env.pull_branch = env.live_branch
     setup_backup_env_webfaction()
@@ -137,16 +158,18 @@ def staging():
     env.base_path = env.staging_app_dir
     env.git_path = "%(staging_app_dir)s/%(project_name)s.git" % env
     env.media_path = env.staging_static_dir
-    env.backup_dir = "%(webfaction_home)s/backups/staging_%(project_name)s" % env
+    env.backup_dir = "%(user_home)s/backups/staging_%(project_name)s" % env
     env.pull_branch = env.live_branch
     env.virtualenv_name = env.staging_virtualenv_name
-    env.virtualenv_path = "%(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
     setup_backup_env_webfaction()
 
 def localhost():
     env.hosts = ['localhost']
-    env.role = "localhost"    
+    env.role = "localhost"
+    env.is_webfaction = False
+    env.is_centos = False
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
     env.git_path = env.base_path
     env.backup_dir = "%(local_working_path)s/db" % env
@@ -156,10 +179,18 @@ def localhost():
     env.media_path = "%(base_path)s/%(media_dir)s" % env
     setup_backup_env_webfaction()
 
+def production_db():
+    pass
+
+def staging_db():
+    pass
+
 env.roledefs = {
     'live': [live],
     'staging': [staging],
-    'local':[local]
+    'local':[local],
+    'live_db':[production_db],
+    'staging_db':[staging_db],
 }
 
 def safe(function_call, *args, **kwargs):
@@ -187,68 +218,69 @@ def magic_run(function_call):
             return run(function_call % env)
 
 def setup_server():
-    try:
-        safe_magic_run("mkdir %(webfaction_home)s/src")
-        magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(webfaction_home)s/.bashrc")
-    except:
-        pass
-
-    try:
-        magic_run("git --version")
-    except:
-        env.git_file_version = "1.7.3.3"
-        magic_run("cd src;wget http://kernel.org/pub/software/scm/git/git-%(git_file_version)s.tar.bz2")
-        magic_run("cd  %(webfaction_home)s/src/; tar fxj git-%(git_file_version)s.tar.bz2;")
-        magic_run("cd %(webfaction_home)s/src/git-%(git_file_version)s; ./configure --prefix=%(webfaction_home)s/git/; make; make install;")
-        magic_run("echo \"export PATH=$PATH:/%(webfaction_home)s/git/bin/\" >> %(webfaction_home)s/.bashrc")
-
-    try:
-        magic_run("pip --version")
-    except:
+    if env.is_webfaction:
         try:
-            safe_magic_run("mkdir %(webfaction_home)s/lib:")
+            safe_magic_run("mkdir %(user_home)s/src")
+            magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(user_home)s/.bashrc")
         except:
             pass
+
         try:
-            safe_magic_run("mkdir %(webfaction_home)s/lib/python2.6")
+            magic_run("git --version")
         except:
-            pass
-        magic_run("easy_install-2.6 pip")
+            env.git_file_version = "1.7.3.3"
+            magic_run("cd src;wget http://kernel.org/pub/software/scm/git/git-%(git_file_version)s.tar.bz2")
+            magic_run("cd  %(user_home)s/src/; tar fxj git-%(git_file_version)s.tar.bz2;")
+            magic_run("cd %(user_home)s/src/git-%(git_file_version)s; ./configure --prefix=%(user_home)s/git/; make; make install;")
+            magic_run("echo \"export PATH=$PATH:/%(user_home)s/git/bin/\" >> %(user_home)s/.bashrc")
 
-    magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
-    safe_magic_run("mkdir %(webfaction_home)s/.virtualenvs")
-    magic_run("mkvirtualenv --no-site-packages %(virtualenv_name)s;")
-    magic_run("echo 'cd %(git_path)s/' > %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
-    magic_run("echo 'export DJANGO_SETTINGS_MODULE=\"envs.%(role)s\"' >> %(webfaction_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")    
+        try:
+            magic_run("pip --version")
+        except:
+            try:
+                safe_magic_run("mkdir %(user_home)s/lib:")
+            except:
+                pass
+            try:
+                safe_magic_run("mkdir %(user_home)s/lib/python2.6")
+            except:
+                pass
+            magic_run("easy_install-2.6 pip")
 
-    safe_magic_run("mkdir %(base_path)s")
+        magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
+        safe_magic_run("mkdir %(user_home)s/.virtualenvs")
+        magic_run("mkvirtualenv --no-site-packages %(virtualenv_name)s;")
+        magic_run("echo 'cd %(git_path)s/' > %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
+        magic_run("echo 'export DJANGO_SETTINGS_MODULE=\"envs.%(role)s\"' >> %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")    
 
-    magic_run("git clone %(git_origin)s %(git_path)s")
+        safe_magic_run("mkdir %(base_path)s")
 
-    magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
-    setup_media_symlinks()
-    setup_project_symlinks()
-    install_requirements()
-    setup_backup_dir_and_cron()
+        magic_run("git clone %(git_origin)s %(git_path)s")
 
-    if not env.is_local:
-        safe_magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi")
+        magic_run("%(work_on)s git checkout %(pull_branch)s; git pull")    
+        setup_media_symlinks()
+        setup_project_symlinks()
+        install_requirements()
+        setup_backup_dir_and_cron()
 
-        # httpd.conf
-        magic_run("mv %(base_path)s/apache2/conf/httpd.conf %(base_path)s/apache2/conf/httpd.conf.bak")
-        magic_run("sed 'N;$!P;$!D;$d' %(base_path)s/apache2/conf/httpd.conf.bak > %(base_path)s/apache2/conf/httpd.conf")
-        magic_run("echo 'WSGIPythonPath %(base_path)s:%(base_path)s/lib/python2.6:%(virtualenv_path)s' >> %(base_path)s/apache2/conf/httpd.conf")
-        magic_run("echo 'WSGIScriptAlias / %(base_path)s/%(project_name)s.wsgi' >> %(base_path)s/apache2/conf/httpd.conf")
+        if not env.is_local:
+            safe_magic_run("rm -rf %(base_path)s/myproject; rm %(base_path)s/myproject.wsgi")
 
-        # WSGI file
-        magic_run("touch %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo 'from django.core.handlers.wsgi import WSGIHandler' >> %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.envs.%(role)s'\" >> %(base_path)s/%(project_name)s.wsgi")
-        magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
+            # httpd.conf
+            magic_run("mv %(base_path)s/apache2/conf/httpd.conf %(base_path)s/apache2/conf/httpd.conf.bak")
+            magic_run("sed 'N;$!P;$!D;$d' %(base_path)s/apache2/conf/httpd.conf.bak > %(base_path)s/apache2/conf/httpd.conf")
+            magic_run("echo 'WSGIPythonPath %(base_path)s:%(base_path)s/lib/python2.6:%(virtualenv_path)s' >> %(base_path)s/apache2/conf/httpd.conf")
+            magic_run("echo 'WSGIScriptAlias / %(base_path)s/%(project_name)s.wsgi' >> %(base_path)s/apache2/conf/httpd.conf")
 
-    restart()
+            # WSGI file
+            magic_run("touch %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo 'from django.core.handlers.wsgi import WSGIHandler' >> %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.envs.%(role)s'\" >> %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
+
+        restart()
 
 def make_wsgi_file():
     magic_run("touch %(base_path)s/%(project_name)s.wsgi")
@@ -262,7 +294,7 @@ def setup_media_symlinks():
     safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
 
 def setup_django_admin_media_symlinks():
-    magic_run("cd %(media_path)s; touch admin; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
+    magic_run("cd %(media_path)s; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
 
 def setup_cms_symlinks():
     magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)s../../../src/django-cms/cms/media/cms .")
@@ -288,7 +320,7 @@ def restart():
 
 def reboot():
     "Reboot the wsgi server."
-    if not env.is_local:
+    if env.is_webfaction:
         shut_down = False
         while not shut_down:
             output = magic_run("%(base_path)s/apache2/bin/stop;")
@@ -297,45 +329,88 @@ def reboot():
                 time.sleep(1)
 
         magic_run("%(base_path)s/apache2/bin/start;")
+    elif env.is_centos:
+        magic_run("service %(project_name)s stop")
+        magic_run("service %(project_name)s start")
 
 
 def stop():
     "Stop the wsgi server."
     if not env.is_local:    
-        magic_run("%(base_path)s/apache2/bin/stop;")
-
-def install_requirements():
-    "Install the requirements."
-    magic_run("%(work_on)s pip install --upgrade -r requirements.txt ")
+        if env.is_webfaction:
+            magic_run("%(base_path)s/apache2/bin/stop;")
+        elif env.is_centos:
+            magic_run("service %(project_name)s stop")
 
 def start():
     "Start the wsgi server."
-    magic_run("%(base_path)s/apache2/bin/start;")
+    if env.is_webfaction:
+        magic_run("%(base_path)s/apache2/bin/start;")
+    elif env.is_centos:
+        magic_run("service %(project_name)s stop")    
+
+def install_requirements():
+    "Install the requirements."
+    magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
+    
 
 def backup_for_deploy():
     "Backup before deploys."
     import os.path
-    env.current_backup_file = "%(backup_dir)s/currentDeployBackup.json" % env    
-    if not os.path.isfile(env.current_backup_file):    
-        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
-        magic_run("zip -r9q %(backup_dir)s/pre_deploy_`date +%%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
-        if env.is_local:
-            magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
-    else:
-        raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
+    if env.is_webfaction:
+        env.current_backup_file = "%(backup_dir)s/currentDeployBackup.json" % env    
+        if not os.path.isfile(env.current_backup_file):
+            magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
+            magic_run("zip -r9q %(backup_dir)s/pre_deploy_`date +%%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
+            if env.is_local:
+                magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
+        else:
+            raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
+    elif env.is_centos:
+        env.current_backup_file = "%(backup_dir)s/currentDeployBackup.dump" % env    
+        if not os.path.isfile(env.current_backup_file):
+            magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdb > %(current_backup_file)s")
+            magic_run("bzip2 -9q %(current_backup_file)s; mv %(current_backup_file)s.bz2 %(backup_dir)s/pre_deploy_`date +%%F`.bz2 ;cp %(backup_dir)s/pre_deploy_`date +%%F`.bz2 %(backup_dir)s/latest_deploy.dump.bz2")
+            if env.is_local:
+                magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
+        else:
+            raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
+
+def download_data_dump():
+    backup_for_deploy()
+    get("%(backup_dir)s/latest_deploy.dump.bz2" % env, env.local_working_path)
+    local("bunzip2 %(local_working_path)s/latest_deploy.dump.bz2" % env)
+
+def load_data_dump_locally(local_file=None):
+    env.local_file = local_file
+    if not env.local_file:
+        env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
+    
+
+    local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
+    local("rm %(local_file)s" % env)
+
+def get_and_load_datadump():
+    download_data_dump()
+    load_data_dump_locally()
+
+def freeze_current_versions():
+    local("pip freeze -r requirements.txt > requirements.stable.txt")
 
 def setup_backup_dir_and_cron():
     # requires fabric and python-crontab installed on the target
     safe_magic_run("mkdir %(backup_root)s")
     safe_magic_run("mkdir %(backup_dir)s")
-    magic_run("echo '%(daily_backup_script)s' > %(backup_dir)s/%(daily_backup_script_name)s")
-    magic_run("echo '%(weekly_backup_script)s' > %(backup_dir)s/%(weekly_backup_script_name)s")
-    magic_run("echo '%(monthly_backup_script)s' > %(backup_dir)s/%(monthly_backup_script_name)s")
-    magic_run("chmod +x %(backup_dir)s/%(daily_backup_script_name)s")
-    magic_run("chmod +x %(backup_dir)s/%(weekly_backup_script_name)s")
-    magic_run("chmod +x %(backup_dir)s/%(monthly_backup_script_name)s")
-
+    
     try:
+        magic_run("echo '%(daily_backup_script)s' > %(backup_dir)s/%(daily_backup_script_name)s")
+        magic_run("echo '%(weekly_backup_script)s' > %(backup_dir)s/%(weekly_backup_script_name)s")
+        magic_run("echo '%(monthly_backup_script)s' > %(backup_dir)s/%(monthly_backup_script_name)s")
+        magic_run("chmod +x %(backup_dir)s/%(daily_backup_script_name)s")
+        magic_run("chmod +x %(backup_dir)s/%(weekly_backup_script_name)s")
+        magic_run("chmod +x %(backup_dir)s/%(monthly_backup_script_name)s")
+
+    
         magic_run("%(work_on)s fab %(role)s setup_crontab")
     except:
         print "CRONTAB SETUP FAILED. Set up the crontabs manually."
@@ -381,7 +456,7 @@ def backup_daily():
 
 def daily_backup_script():    
     script = """#!/bin/bash
-source %(webfaction_home)s/bin/virtualenvwrapper.sh
+source %(user_home)s/bin/virtualenvwrapper.sh
 %(work_on)s cd %(project_name)s; 
 %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s
 
@@ -435,6 +510,7 @@ cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip
     # script = script.replace("\n","\\n")
     return script
 
+
 def kill_pyc():
     magic_run("%(work_on)s cd %(git_path)s;find . -iname '*.pyc' -delete")
 
@@ -444,13 +520,25 @@ def migrate():
 def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
 
-def deploy():
+def deploy_fast():
     backup_for_deploy()
     pull()
     kill_pyc()
     install_requirements()
+    syncdb()
     migrate()
     reboot()
+
+def deploy_slow():
+    stop()
+    backup_for_deploy()
+    pull()
+    kill_pyc()
+    install_requirements()
+    syncdb()
+    migrate()
+    start()
+
 
 def test():
     local("cd %(base_path)s; python manage.py test" % env, fail='abort')

@@ -4,7 +4,7 @@ It's pretty bare right now, but will see buildout as the joy of consolidation sp
 
 
 Includes:
-- fabbase.py - the base fabric setup for (mostly) webfaction deploys
+- fabbase.py - the base fabric setup for webfaction and centos/nginx/django deploys
 - smoke_tests.py - a helper method for running quick django client tests.
 - context_processors.py - a simple context processor that adds ENV to the request context (from settings.ENV)
 - helpers.py - helpers for rendering views

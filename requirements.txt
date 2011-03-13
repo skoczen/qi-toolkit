@@ -2,3 +2,4 @@ nose
 django-nose
 -e git://github.com/Almad/django-sane-testing.git#egg=djangosanetesting
 python-crontab
+-e hg+https://django-dumpdb.googlecode.com/hg/django-dumpdb#egg=django_dumpdb
