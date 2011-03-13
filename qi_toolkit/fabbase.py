@@ -347,7 +347,7 @@ def start():
     if env.is_webfaction:
         magic_run("%(base_path)s/apache2/bin/start;")
     elif env.is_centos:
-        magic_run("service %(project_name)s stop")    
+        magic_run("service %(project_name)s start")    
 
 def install_requirements():
     "Install the requirements."
