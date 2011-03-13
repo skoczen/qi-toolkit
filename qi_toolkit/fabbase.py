@@ -349,6 +349,22 @@ def start():
     elif env.is_centos:
         magic_run("service %(project_name)s start")    
 
+def reboot_nginx():
+    if env.is_centos:
+        magic_run("service nginx stop")
+        magic_run("service nginx start")
+
+
+def stop_nginx():
+    if env.is_centos:
+        magic_run("service nginx stop")
+
+def start_nginx():
+    if env.is_centos:
+        magic_run("service nginx start")    
+
+
+
 def install_requirements():
     "Install the requirements."
     magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
