@@ -581,7 +581,10 @@ def reset(repo, hash):
 
 
 def ssh_auth_me():
-    my_key = local("cat ~/.ssh/id_dsa.pub")
+    try:
+        my_key = local("cat ~/.ssh/id_dsa.pub")
+    except:
+        my_key = ""
     if my_key == "":
         my_key = local("cat ~/.ssh/id_rsa.pub")        
 
