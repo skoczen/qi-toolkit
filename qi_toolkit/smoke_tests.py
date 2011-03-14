@@ -17,7 +17,7 @@ DEFAULT_SMOKE_TEST_OPTIONS = {
     'verbose'           : True,
     'check_title'       : False,
 }
-if hasattr(settings.DEFAULT_SMOKE_TEST_OPTIONS):
+if hasattr(settings, "DEFAULT_SMOKE_TEST_OPTIONS"):
     DEFAULT_SMOKE_TEST_OPTIONS.update(settings.DEFAULT_SMOKE_TEST_OPTIONS);
 
 class Config(object):
