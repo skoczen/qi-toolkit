@@ -368,6 +368,11 @@ def start_nginx():
 def install_requirements():
     "Install the requirements."
     magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
+
+
+def quick_install_requirements():
+    "Install the requirements, but don't upgrade everything."
+    magic_run("%(work_on)s pip install -q -r requirements.txt ")
     
 
 def backup_for_deploy():
@@ -540,7 +545,7 @@ def deploy_fast():
     backup_for_deploy()
     pull()
     kill_pyc()
-    install_requirements()
+    quick_install_requirements()
     syncdb()
     migrate()
     reboot()
