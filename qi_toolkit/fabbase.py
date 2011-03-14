@@ -411,8 +411,16 @@ def load_data_dump_locally(local_file=None):
     local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
     local("rm %(local_file)s" % env)
 
-def remotely_get_and_load_live_data_dump():
-    magic_run("%(work_on)s fab live get_and_load_datadump")
+def put_and_load_data_dump():
+    env.local_file = local_file
+    if not env.local_file:
+        env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
+    
+    env.remote_file = "%(base_path)s/latest_deploy.dump" % env
+    put(env.local_file, env.remote_file)
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(remote_file)s")
+    magic_run("rm %(remote_file)s")
+    
 
 def get_and_load_datadump():
     download_data_dump()
