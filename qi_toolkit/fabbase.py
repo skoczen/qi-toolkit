@@ -411,7 +411,7 @@ def load_data_dump_locally(local_file=None):
     local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
     local("rm %(local_file)s" % env)
 
-def put_and_load_data_dump():
+def put_and_load_data_dump(local_file=None):
     env.local_file = local_file
     if not env.local_file:
         env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
