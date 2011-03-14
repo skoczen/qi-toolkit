@@ -411,6 +411,9 @@ def load_data_dump_locally(local_file=None):
     local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
     local("rm %(local_file)s" % env)
 
+def remotely_get_and_load_live_data_dump():
+    magic_run("%(work_on)s fab live get_and_load_datadump")
+
 def get_and_load_datadump():
     download_data_dump()
     load_data_dump_locally()
