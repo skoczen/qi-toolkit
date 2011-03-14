@@ -2,6 +2,7 @@ from django.test.client import Client
 from nose.tools import istest, nottest, assert_true
 from django.core.urlresolvers import reverse
 from django.db import transaction
+from django.conf import settings
 import re
 
 title_re = re.compile("<title>.+?<\/title>",re.I)
@@ -16,6 +17,8 @@ DEFAULT_SMOKE_TEST_OPTIONS = {
     'verbose'           : True,
     'check_title'       : False,
 }
+if hasattr(settings.DEFAULT_SMOKE_TEST_OPTIONS):
+    DEFAULT_SMOKE_TEST_OPTIONS.update(settings.DEFAULT_SMOKE_TEST_OPTIONS);
 
 class Config(object):
     pass
