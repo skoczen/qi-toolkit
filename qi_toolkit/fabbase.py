@@ -35,6 +35,7 @@
 from __future__ import with_statement # needed for python 2.5
 from fabric.api import *
 import fabric
+from fabric.contrib.console import confirm
 from qi_toolkit.helpers import print_exception
 import time
 
@@ -412,14 +413,15 @@ def load_data_dump_locally(local_file=None):
     local("rm %(local_file)s" % env)
 
 def put_and_load_data_dump(local_file=None):
-    env.local_file = local_file
-    if not env.local_file:
-        env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
-    
-    env.remote_file = "%(base_path)s/latest_deploy.dump" % env
-    put(env.local_file, env.remote_file)
-    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(remote_file)s")
-    magic_run("rm %(remote_file)s")
+    if env.role != "staging" or confirm("Wait, really? Really really??"):
+        env.local_file = local_file
+        if not env.local_file:
+            env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
+        
+        env.remote_file = "%(base_path)s/latest_deploy.dump" % env
+        put(env.local_file, env.remote_file)
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(remote_file)s")
+        magic_run("rm %(remote_file)s")
     
 
 def get_and_load_datadump():
