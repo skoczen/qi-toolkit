@@ -14,7 +14,7 @@ class QiConservativeSeleniumTestCase(QiSeleniumTestCase):
 
     def tearDown(self, *args, **kwargs):
         super(QiConservativeSeleniumTestCase,self).tearDown(*args, **kwargs)
-        silence_print()
+        _p = silence_print()
         call_command('flush', interactive=False)
-        unsilence_print()
+        unsilence_print(_p)
 
