@@ -6,11 +6,9 @@ class QiSeleniumTestCase(SeleniumTestCase):
     
     def setUp(self, *args, **kwargs):
         self.verificationErrors = []
-        super(QiSeleniumTestCase,self).setUp(*args, **kwargs)
 
     def tearDown(self, *args, **kwargs):
         self.assertEqual([], self.verificationErrors)
-        super(QiSeleniumTestCase,self).tearDown(*args, **kwargs)
 
 class QiConservativeSeleniumTestCase(QiSeleniumTestCase):
 
