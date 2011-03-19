@@ -363,10 +363,9 @@ def nginx_start():
     if env.is_centos:
         magic_run("service nginx start")    
 
-def celery_reboot():
+def celery_restart():
     if env.is_centos:
-        magic_run("service celeryd stop")
-        magic_run("service celeryd start")
+        magic_run("service celeryd restart")
 
 def celery_stop():
     if env.is_centos:
