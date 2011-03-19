@@ -350,21 +350,31 @@ def start():
     elif env.is_centos:
         magic_run("service %(project_name)s start")    
 
-def reboot_nginx():
+def nginx_reboot():
     if env.is_centos:
         magic_run("service nginx stop")
         magic_run("service nginx start")
 
-
-def stop_nginx():
+def nginx_stop():
     if env.is_centos:
         magic_run("service nginx stop")
 
-def start_nginx():
+def nginx_start():
     if env.is_centos:
         magic_run("service nginx start")    
 
+def celery_reboot():
+    if env.is_centos:
+        magic_run("service celeryd stop")
+        magic_run("service celeryd start")
 
+def celery_stop():
+    if env.is_centos:
+        magic_run("service celeryd stop")
+
+def celery_start():
+    if env.is_centos:
+        magic_run("service celeryd start")    
 
 def install_requirements():
     "Install the requirements."
