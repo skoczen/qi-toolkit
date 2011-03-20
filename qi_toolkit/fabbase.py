@@ -573,17 +573,18 @@ def deploy_media():
         print_exception()
 
 
-def deploy_fast():
+def deploy_fast(with_media=True):
     backup_for_deploy()
     pull()
     kill_pyc()
     quick_install_requirements()
     syncdb()
     migrate()
-    deploy_media()
+    if with_media:
+        deploy_media()
     reboot()
 
-def deploy_slow():
+def deploy_slow(with_media=True):
     stop()
     backup_for_deploy()
     pull()
@@ -591,7 +592,8 @@ def deploy_slow():
     install_requirements()
     syncdb()
     migrate()
-    deploy_media()
+    if with_media:
+        deploy_media()
     start()
 
 
