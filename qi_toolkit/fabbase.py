@@ -308,7 +308,7 @@ def setup_project_symlinks():
 
 def pull():
     "Updates the repository."
-    magic_run("cd %(git_path)s; git pull %(parent)s %(pull_branch)s")
+    magic_run("cd %(git_path)s; git checkout %(parents)s %(pull_branch)s;git pull")
 
 def git_reset(hash=""):
     env.hash = hash
@@ -582,7 +582,7 @@ def deploy_media():
 def deploy_fast(with_media="True", force_pip_upgrade="False"):
     force_pip_upgrade = force_pip_upgrade.lower == "true"
     with_media = with_media.lower() == "true"
-    
+
     backup_for_deploy()
     pull()
     kill_pyc()
@@ -591,7 +591,9 @@ def deploy_fast(with_media="True", force_pip_upgrade="False"):
     migrate()
     if with_media:
         deploy_media()
+    celery_restart()
     reboot()
+
 
 def deploy_slow(with_media="True", force_pip_upgrade="False"):
     force_pip_upgrade = force_pip_upgrade.lower == "true"
@@ -605,6 +607,8 @@ def deploy_slow(with_media="True", force_pip_upgrade="False"):
     migrate()
     if with_media:
         deploy_media()
+    celery_restart()
+    nginx_reboot()
     start()
 
 
