@@ -580,7 +580,7 @@ def deploy_media():
 
 
 def deploy_fast(with_media="True", force_pip_upgrade="False"):
-    force_pip_upgrade = force_pip_upgrade.lower == "true"
+    force_pip_upgrade = force_pip_upgrade.lower() == "true"
     with_media = with_media.lower() == "true"
 
     backup_for_deploy()
@@ -596,7 +596,7 @@ def deploy_fast(with_media="True", force_pip_upgrade="False"):
 
 
 def deploy_slow(with_media="True", force_pip_upgrade="False"):
-    force_pip_upgrade = force_pip_upgrade.lower == "true"
+    force_pip_upgrade = force_pip_upgrade.lower() == "true"
     with_media = with_media.lower() == "true"
     stop()
     backup_for_deploy()
