@@ -144,6 +144,7 @@ def setup_backup_env_webfaction():
 def live():
     env.python = "python2.6"
     env.role = "live"
+    env.settings_file = "envs.%(role)s" % env
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
     env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
@@ -155,6 +156,7 @@ def live():
 def staging():
     env.python = "python2.6"
     env.role = "staging"
+    env.settings_file = "envs.%(role)s" % env
     env.hosts = env.staging_hosts
     env.base_path = env.staging_app_dir
     env.git_path = "%(staging_app_dir)s/%(project_name)s.git" % env
@@ -169,6 +171,7 @@ def staging():
 def localhost():
     env.hosts = ['localhost']
     env.role = "localhost"
+    env.settings_file = "envs.dev" % env
     env.is_webfaction = False
     env.is_centos = False
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
@@ -563,7 +566,15 @@ def migrate():
 def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
 
+def deploy_media():
+    try:
+        local("%(work_on)s cd %(project_name)s; %(python)s manage.py syncmedia --settings=envs.%(local_file)s" % env)
+    except:
+        print_exception()
+
+
 def deploy_fast():
+    deploy_media()
     backup_for_deploy()
     pull()
     kill_pyc()
@@ -573,6 +584,7 @@ def deploy_fast():
     reboot()
 
 def deploy_slow():
+    deploy_media()
     stop()
     backup_for_deploy()
     pull()
