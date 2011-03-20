@@ -308,7 +308,7 @@ def setup_project_symlinks():
 
 def pull():
     "Updates the repository."
-    magic_run("cd %(git_path)s; git checkout %(parents)s %(pull_branch)s;git pull")
+    magic_run("cd %(git_path)s; git checkout %(parent)s %(pull_branch)s;git pull")
 
 def git_reset(hash=""):
     env.hash = hash
