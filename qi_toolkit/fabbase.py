@@ -568,7 +568,7 @@ def syncdb():
 
 def deploy_media():
     try:
-        local("%(work_on)s cd %(project_name)s; %(python)s manage.py syncmedia --settings=envs.%(local_file)s" % env)
+        local("%(work_on)s cd %(project_name)s; %(python)s manage.py syncmedia --settings=%(settings_file)s" % env)
     except:
         print_exception()
 
