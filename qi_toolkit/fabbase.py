@@ -574,17 +574,16 @@ def deploy_media():
 
 
 def deploy_fast():
-    deploy_media()
     backup_for_deploy()
     pull()
     kill_pyc()
     quick_install_requirements()
     syncdb()
     migrate()
+    deploy_media()
     reboot()
 
 def deploy_slow():
-    deploy_media()
     stop()
     backup_for_deploy()
     pull()
@@ -592,6 +591,7 @@ def deploy_slow():
     install_requirements()
     syncdb()
     migrate()
+    deploy_media()
     start()
 
 
