@@ -378,15 +378,21 @@ def celery_start():
     if env.is_centos:
         magic_run("service celeryd start")    
 
-def install_requirements():
+def install_requirements(force_pip_upgrade=False):
     "Install the requirements."
-    magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
+    if not force_pip_upgrade:
+        magic_run("%(work_on)s pip install --upgrade -q -r requirements.stable.txt ")
+    else:
+        magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
 
 
-def quick_install_requirements():
+def quick_install_requirements(force_pip_upgrade=False):
     "Install the requirements, but don't upgrade everything."
-    magic_run("%(work_on)s pip install -q -r requirements.txt ")
-    
+    if not force_pip_upgrade:
+        magic_run("%(work_on)s pip install -q -r requirements.stable.txt ")
+    else:
+        magic_run("%(work_on)s pip install -q -r requirements.txt ")
+   
 
 def backup_for_deploy():
     "Backup before deploys."
@@ -573,23 +579,23 @@ def deploy_media():
         print_exception()
 
 
-def deploy_fast(with_media=True):
+def deploy_fast(with_media=True, force_pip_upgrade=False):
     backup_for_deploy()
     pull()
     kill_pyc()
-    quick_install_requirements()
+    quick_install_requirements(force_pip_upgrade=force_pip_upgrade)
     syncdb()
     migrate()
     if with_media:
         deploy_media()
     reboot()
 
-def deploy_slow(with_media=True):
+def deploy_slow(with_media=True, force_pip_upgrade=False):
     stop()
     backup_for_deploy()
     pull()
     kill_pyc()
-    install_requirements()
+    install_requirements(force_pip_upgrade=force_pip_upgrade)
     syncdb()
     migrate()
     if with_media:
