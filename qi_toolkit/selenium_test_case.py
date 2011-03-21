@@ -2,7 +2,7 @@ from djangosanetesting.cases import SeleniumTestCase
 from django.core.management import call_command
 from helpers import silence_print, unsilence_print
 class QiSeleniumTestCase(SeleniumTestCase):
-    selenium_fixtures = []
+    # selenium_fixtures = []
     
     def setUp(self, *args, **kwargs):
         self.verificationErrors = []
