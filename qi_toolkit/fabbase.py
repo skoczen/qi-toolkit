@@ -378,20 +378,29 @@ def celery_start():
     if env.is_centos:
         magic_run("service celeryd start")    
 
-def install_requirements(force_pip_upgrade=False):
+def install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=True):
     "Install the requirements."
-    if not force_pip_upgrade:
-        magic_run("%(work_on)s pip install --upgrade -q -r requirements.stable.txt ")
-    else:
-        magic_run("%(work_on)s pip install --upgrade -q -r requirements.txt ")
+    force_upgrade_string = ""
+    if force_pip_upgrade:
+        force_upgrade_string = "--upgrade"
+    
+    requirements = "requirements.stable.txt"
+    if use_unstable:
+        requirements = "requirements.txt"
+    
+    if clear_source:
+        magic_run("rm -rf  %(virtualenv_path)s../../../src")
 
 
-def quick_install_requirements(force_pip_upgrade=False):
+    magic_run("%(work_on)s pip install %(upgrade)s -q -r %(requirements)s" % {'upgrade':force_upgrade_string,'requirements':requirements})
+
+def quick_install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=False):
     "Install the requirements, but don't upgrade everything."
-    if not force_pip_upgrade:
-        magic_run("%(work_on)s pip install -q -r requirements.stable.txt ")
-    else:
-        magic_run("%(work_on)s pip install -q -r requirements.txt ")
+    install_requirements()
+
+def safe_install_requirements(force_pip_upgrade=True, use_unstable=False, clear_source=True):
+    "Install the requirements, but don't upgrade everything."
+    install_requirements()
    
 
 def backup_for_deploy():
@@ -586,7 +595,7 @@ def deploy_fast(with_media="False", force_pip_upgrade="False"):
     backup_for_deploy()
     pull()
     kill_pyc()
-    quick_install_requirements(force_pip_upgrade=force_pip_upgrade)
+    quick_install_requirements()
     syncdb()
     migrate()
     if with_media:
@@ -602,7 +611,7 @@ def deploy_slow(with_media="False", force_pip_upgrade="False"):
     backup_for_deploy()
     pull()
     kill_pyc()
-    install_requirements(force_pip_upgrade=force_pip_upgrade)
+    safe_install_requirements()
     syncdb()
     migrate()
     if with_media:
