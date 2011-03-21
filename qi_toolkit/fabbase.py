@@ -142,7 +142,7 @@ def setup_backup_env_webfaction():
 
 
 def live(dry_run="False"):
-    env.dry_run = dry_run.lower == "true"
+    env.dry_run = dry_run.lower() == "true"
     env.python = "python2.6"
     env.role = "live"
     env.settings_file = "envs.%(role)s" % env
@@ -155,7 +155,7 @@ def live(dry_run="False"):
     setup_backup_env_webfaction()
     
 def staging(dry_run="False"):
-    env.dry_run = dry_run.lower == "true"
+    env.dry_run = dry_run.lower() == "true"
     env.python = "python2.6"
     env.role = "staging"
     env.settings_file = "envs.%(role)s" % env
@@ -171,7 +171,7 @@ def staging(dry_run="False"):
     setup_backup_env_webfaction()
 
 def localhost(dry_run="False"):
-    env.dry_run = dry_run.lower == "true"
+    env.dry_run = dry_run.lower() == "true"
     env.hosts = ['localhost']
     env.role = "localhost"
     env.settings_file = "envs.dev" % env
