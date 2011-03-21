@@ -383,19 +383,19 @@ def celery_start():
 
 def install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=True):
     "Install the requirements."
-    force_upgrade_string = ""
+    env.force_upgrade_string = ""
     if force_pip_upgrade:
-        force_upgrade_string = "--upgrade"
+        env.force_upgrade_string = "--upgrade"
     
-    requirements = "requirements.stable.txt"
+    env.requirements = "requirements.stable.txt"
     if use_unstable:
-        requirements = "requirements.txt"
+        env.requirements = "requirements.txt"
     
     if clear_source:
         magic_run("rm -rf  %(virtualenv_path)s../../../src")
 
 
-    magic_run("%(work_on)s pip install %(upgrade)s -q -r %(requirements)s" % {'upgrade':force_upgrade_string,'requirements':requirements})
+    magic_run("%(work_on)s pip install %(force_upgrade_string)s -q -r %(requirements)s" % env)
 
 def quick_install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=False):
     "Install the requirements, but don't upgrade everything."
