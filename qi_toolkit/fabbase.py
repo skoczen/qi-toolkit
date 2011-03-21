@@ -88,7 +88,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
 
 def setup_env_centos(project_name, system_user="root", initial_settings={}, overrides={}):
     global env
-    env.dry_run = False    
+    env.dry_run = False
     env.project_name = project_name
     env.system_user = system_user
     env.is_webfaction = False
@@ -141,7 +141,8 @@ def setup_backup_env_webfaction():
     env.monthly_backup_script = monthly_backup_script()
 
 
-def live():
+def live(dry_run="False"):
+    env.dry_run = dry_run.lower == "true"
     env.python = "python2.6"
     env.role = "live"
     env.settings_file = "envs.%(role)s" % env
@@ -153,7 +154,8 @@ def live():
     env.pull_branch = env.live_branch
     setup_backup_env_webfaction()
     
-def staging():
+def staging(dry_run="False"):
+    env.dry_run = dry_run.lower == "true"
     env.python = "python2.6"
     env.role = "staging"
     env.settings_file = "envs.%(role)s" % env
@@ -168,7 +170,8 @@ def staging():
     env.work_on = "workon %(virtualenv_name)s; " % env
     setup_backup_env_webfaction()
 
-def localhost():
+def localhost(dry_run="False"):
+    env.dry_run = dry_run.lower == "true"
     env.hosts = ['localhost']
     env.role = "localhost"
     env.settings_file = "envs.dev" % env
