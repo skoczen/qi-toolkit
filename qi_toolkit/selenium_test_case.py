@@ -1,6 +1,8 @@
 from djangosanetesting.cases import SeleniumTestCase
 from django.core.management import call_command
 from helpers import silence_print, unsilence_print
+import time
+
 class QiSeleniumTestCase(SeleniumTestCase):
     # selenium_fixtures = []
     
