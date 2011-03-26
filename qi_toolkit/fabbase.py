@@ -399,11 +399,11 @@ def install_requirements(force_pip_upgrade=False, use_unstable=False, clear_sour
 
 def quick_install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=False):
     "Install the requirements, but don't upgrade everything."
-    install_requirements()
+    install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
 
 def safe_install_requirements(force_pip_upgrade=True, use_unstable=False, clear_source=True):
     "Install the requirements, but don't upgrade everything."
-    install_requirements()
+    install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
    
 
 def backup_for_deploy():
@@ -599,7 +599,7 @@ def deploy_fast(with_media="False", force_pip_upgrade="False", use_unstable="Fal
     backup_for_deploy()
     pull()
     kill_pyc()
-    quick_install_requirements()
+    quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
     syncdb()
     migrate()
     if with_media:
@@ -617,7 +617,7 @@ def deploy_slow(with_media="False", force_pip_upgrade="False", use_unstable="Fal
     backup_for_deploy()
     pull()
     kill_pyc()
-    safe_install_requirements()
+    safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
     syncdb()
     migrate()
     if with_media:
