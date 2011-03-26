@@ -10,6 +10,12 @@ class QiSeleniumTestCase(SeleniumTestCase):
     def tearDown(self, *args, **kwargs):
         self.assertEqual([], self.verificationErrors)
 
+    def js_refresh(self):
+        sel = self.selenium
+        sel.get_eval("window.location.href")
+        sel.get_eval("window.location.href=window.location.href;")
+        time.sleep(4)
+
 class QiConservativeSeleniumTestCase(QiSeleniumTestCase):
 
     def tearDown(self, *args, **kwargs):
