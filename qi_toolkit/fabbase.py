@@ -402,7 +402,7 @@ def quick_install_requirements(force_pip_upgrade=False, use_unstable=False, clea
     install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
 
 def safe_install_requirements(force_pip_upgrade=True, use_unstable=False, clear_source=True):
-    "Install the requirements, but don't upgrade everything."
+    "Install the requirements, and upgrade everything."
     install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
    
 
