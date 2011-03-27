@@ -599,7 +599,7 @@ def deploy_fast(with_media="False", force_pip_upgrade="False", use_unstable="Fal
     backup_for_deploy()
     pull()
     kill_pyc()
-    quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
+    quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
     if with_media:
@@ -617,7 +617,7 @@ def deploy_slow(with_media="False", force_pip_upgrade="False", use_unstable="Fal
     backup_for_deploy()
     pull()
     kill_pyc()
-    safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
+    safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
     if with_media:
