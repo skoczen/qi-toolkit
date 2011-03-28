@@ -72,6 +72,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.monthly_backup_script_name = "monthly_backup.sh"
 
     env.staging_hosts = env.production_hosts
+    print env.production_hosts
     env.virtualenv_name = env.project_name
 
     env.staging_virtualenv_name = "staging_%(project_name)s" % env
