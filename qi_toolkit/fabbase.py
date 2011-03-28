@@ -55,7 +55,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.is_local = False
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
-    env.webfaction_host = '%(webfaction_user)s.webfactional.com' % env
+    env.webfaction_host = '%(webfaction_user)s@%(webfaction_user)s.webfactional.com' % env
 
     env.production_hosts = [] 
     env.staging_hosts = []
@@ -72,7 +72,6 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.monthly_backup_script_name = "monthly_backup.sh"
 
     env.staging_hosts = env.production_hosts
-    print env.production_hosts
     env.virtualenv_name = env.project_name
 
     env.staging_virtualenv_name = "staging_%(project_name)s" % env
