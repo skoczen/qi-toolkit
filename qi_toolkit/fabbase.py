@@ -66,7 +66,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     # semi-automated.  Override this for more complex, multi-server setups, or non-wf installs.
     env.production_hosts = ['%(webfaction_host)s' % env] 
     env.user_home = "/home/%(webfaction_user)s" % env
-    env.git_origin = "%(webfaction_user)s@%(webfaction_host)s:%(user_home)s/git-root/%(project_name)s.git" % env
+    env.git_origin = "%(webfaction_host)s:%(user_home)s/git-root/%(project_name)s.git" % env
     env.daily_backup_script_name = "daily_backup.sh"
     env.weekly_backup_script_name = "weekly_backup.sh"
     env.monthly_backup_script_name = "monthly_backup.sh"
