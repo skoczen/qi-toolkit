@@ -18,6 +18,11 @@ class QiSeleniumTestCase(SeleniumTestCase):
         sel.get_eval("window.location.href=window.location.href;")
         time.sleep(4)
 
+    def click_and_wait(self, link):
+        sel = self.selenium
+        sel.click(link)
+        sel.wait_for_page_to_load("30000")
+
 class QiConservativeSeleniumTestCase(QiSeleniumTestCase):
 
     def tearDown(self, *args, **kwargs):
