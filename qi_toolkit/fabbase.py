@@ -381,7 +381,7 @@ def celery_start():
     if env.is_centos:
         magic_run("service celeryd start")    
 
-def install_requirements(force_pip_upgrade=False, use_unstable=False, clear_source=True):
+def install_requirements(force_pip_upgrade=False, use_unstable=True, clear_source=True):
     "Install the requirements."
     env.force_upgrade_string = ""
     if force_pip_upgrade:
