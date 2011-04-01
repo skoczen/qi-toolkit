@@ -16,7 +16,7 @@ class TimestampModelMixin(models.Model):
     def save(self, *args, **kwargs):
         self.modified_at = datetime.datetime.now()
         if not self.id:
-            self.created_at = self.modified_at
+            self.created_at = datetime.datetime.now()
         super(TimestampModelMixin,self).save(*args, **kwargs)
 
     class Meta:
