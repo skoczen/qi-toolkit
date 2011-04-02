@@ -31,3 +31,7 @@ class QiConservativeSeleniumTestCase(QiSeleniumTestCase):
         call_command('flush', interactive=False)
         unsilence_print(_p)
 
+class QiUnitTestMixin(object):
+
+    def assertEqualQuerySets(self, q1, q2):
+        self.assertEqual(list(q1),list(q2))
