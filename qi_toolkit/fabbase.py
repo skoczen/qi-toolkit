@@ -93,6 +93,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.system_user = system_user
     env.is_webfaction = False
     env.is_centos = True
+    env.use_master_for_migration = False
 
     # Custom Config Start
     env.parent = "origin"
@@ -144,6 +145,7 @@ def setup_backup_env_webfaction():
 def live(dry_run="False"):
     env.dry_run = dry_run.lower() == "true"
     env.python = "python2.6"
+    env.use_master_for_migration = True
     env.role = "live"
     env.settings_file = "envs.%(role)s" % env
     env.hosts = env.production_hosts
@@ -259,6 +261,7 @@ def setup_server():
         magic_run("mkvirtualenv --no-site-packages %(virtualenv_name)s;")
         magic_run("echo 'cd %(git_path)s/' > %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
         magic_run("echo 'export DJANGO_SETTINGS_MODULE=\"envs.%(role)s\"' >> %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")    
+        magic_run("echo 'export PYTHONPATH=\"%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/site-packages/:%(base_path)s/%(project_name)s\"' >> %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/postactivate")
 
         safe_magic_run("mkdir %(base_path)s")
 
@@ -579,7 +582,10 @@ def kill_pyc():
     magic_run("%(work_on)s cd %(git_path)s;find . -iname '*.pyc' -delete")
 
 def migrate():
-    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
+    if env.use_master_for_migration:
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate --database=master")
+    else:
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
 
 def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
