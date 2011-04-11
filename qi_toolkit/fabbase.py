@@ -121,7 +121,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
         env.user_home = "/home/%(system_user)s" % env
 
     env.virtualenv_name = env.project_name
-    env.staging_virtualenv_name = "staging_%(virtualenv_name)" % env
+    env.staging_virtualenv_name = "staging_%(virtualenv_name)s" % env
     env.live_app_dir = "/var/www"
     env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
     env.live_static_dir = "%(git_path)s/media" % env
