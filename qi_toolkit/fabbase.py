@@ -541,7 +541,6 @@ rm %(current_backup_file)s
 cd %(backup_dir)s; mkdir cur_images;
 cp -R %(media_path)s/cms %(backup_dir)s/cur_images/
 cp -R %(media_path)s/images %(backup_dir)s/cur_images/
-cp -R %(media_path)s/goodcloud_people %(backup_dir)s/cur_images/
 cd %(backup_dir)s; zip -r9q cur_images2.zip cur_images
 cd %(backup_dir)s; rm -rf cur_images
 mv %(backup_dir)s/cur_images2.zip %(backup_dir)s/cur_images.zip
