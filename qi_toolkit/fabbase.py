@@ -148,7 +148,6 @@ def live(dry_run="False"):
     env.settings_file = "envs.%(role)s" % env
     env.hosts = env.production_hosts
     env.base_path = env.live_app_dir
-    env.project_name_with_role = "%(project_name)s_%(role)s" % env
     env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
     env.backup_dir = "%(user_home)s/backups/%(project_name)s" % env
     env.media_path = env.live_static_dir
@@ -165,7 +164,6 @@ def staging(dry_run="False"):
     env.git_path = "%(staging_app_dir)s/%(project_name)s.git" % env
     env.media_path = env.staging_static_dir
     env.backup_dir = "%(user_home)s/backups/staging_%(project_name)s" % env
-    env.project_name_with_role = "%(project_name)s_%(role)s" % env
     env.pull_branch = env.live_branch
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
@@ -180,7 +178,6 @@ def localhost(dry_run="False"):
     env.is_webfaction = False
     env.is_centos = False
     env.base_path = "%(local_working_path)s/%(project_name)s" % env
-    env.project_name_with_role = "%(project_name)s" % env
     env.git_path = env.base_path
     env.backup_dir = "%(local_working_path)s/db" % env
     env.pull_branch = env.working_branch
@@ -525,7 +522,7 @@ def backup_daily():
 def daily_backup_script():    
     script = """#!/bin/bash
 source %(user_home)s/bin/virtualenvwrapper.sh
-%(work_on)s cd %(project_name_with_role)s; 
+%(work_on)s cd %(project_name)s; 
 %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s
 
 mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip
