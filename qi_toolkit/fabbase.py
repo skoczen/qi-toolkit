@@ -305,7 +305,7 @@ def setup_django_admin_media_symlinks():
     magic_run("cd %(media_path)s; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
 
 def setup_cms_symlinks():
-    magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)s../../../src/django-cms/cms/media/cms .")
+    magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)scms/media/cms .")
 
 def setup_project_symlinks():
     pass
