@@ -51,6 +51,11 @@ class QiFactory:
     def rand_currency(cls, start=0, end=100):
         return Decimal(cls.rand_int(start=start*100,end=end*100))/100
 
+    @classmethod
+    def rand_domain(cls):
+        return RANDOM_EMAIL_DOMAINS[cls.rand_int(0,len(RANDOM_EMAIL_DOMAINS)-1)]
+
+
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
 "Maria", "Susan", "Margaret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", 
 "Helen", "Sandra", "Donna", "Carol", "Ruth", "Sharon", "Michelle", "Laura", 
@@ -294,4 +299,4 @@ RANDOM_PLANT_NAME_SOURCE = ["Abelia","Acacia","Acer","Acevedo","Afra","Akina",
 
 RANDOM_STREET_SUFFIX_SOURCE = ["St.", "Ave.", "Blvd.", "Ln.", "Ct.", "Pl.", "Way"]
 
-RANDOM_EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "live.com", "comcast.net", "qwest.com","example.com"]
+RANDOM_EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "live.com", "comcast.net", "qwest.com","example.com","example.net","example.org"]
