@@ -56,6 +56,7 @@ class QiFactory:
     def rand_domain(cls):
         return RANDOM_EMAIL_DOMAINS[cls.rand_int(0,len(RANDOM_EMAIL_DOMAINS)-1)]
     
+    @classmethod
     def rand_us_state(cls):
         return STATE_CHOICES[cls.rand_int(0,len(STATE_CHOICES)-1)][0]
 
