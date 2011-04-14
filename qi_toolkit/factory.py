@@ -293,3 +293,5 @@ RANDOM_PLANT_NAME_SOURCE = ["Abelia","Acacia","Acer","Acevedo","Afra","Akina",
 "Yew","Zara"]
 
 RANDOM_STREET_SUFFIX_SOURCE = ["St.", "Ave.", "Blvd.", "Ln.", "Ct.", "Pl.", "Way"]
+
+RANDOM_EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "hotmail.com", "live.com", "comcast.net", "qwest.com","example.com"]
