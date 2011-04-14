@@ -4,6 +4,7 @@ import datetime
 import base64
 from decimal import getcontext, Decimal
 getcontext().prec = 7
+from django.contrib.localflavor.us.us_states import US_STATES
 
 class QiFactory:
     @classmethod
@@ -54,6 +55,9 @@ class QiFactory:
     @classmethod
     def rand_domain(cls):
         return RANDOM_EMAIL_DOMAINS[cls.rand_int(0,len(RANDOM_EMAIL_DOMAINS)-1)]
+    
+    def rand_us_state(cls):
+        return US_STATES[cls.rand_int(0,len(US_STATES)-1)]
 
 
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
