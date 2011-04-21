@@ -10,7 +10,8 @@ class QiSeleniumTestCase(SeleniumTestCase):
         self.verificationErrors = []
 
     def tearDown(self, *args, **kwargs):
-        self.assertEqual([], self.verificationErrors)
+        if hasattr(self,"verificationErrors"):
+            self.assertEqual([], self.verificationErrors)
 
     def js_refresh(self):
         sel = self.selenium
