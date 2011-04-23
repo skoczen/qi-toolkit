@@ -8,6 +8,6 @@ def robots_txt(request, allow=False):
     except:
         pass
     if allow:
-        return HttpResponse("User-agent: *\nAllow: ", mimetype="text/plain")
+        return HttpResponse("User-agent: *\nAllow: /", mimetype="text/plain")
     else:
-        return HttpResponse("User-agent: *\nDisallow: ", mimetype="text/plain")
+        return HttpResponse("User-agent: *\nDisallow: /", mimetype="text/plain")
