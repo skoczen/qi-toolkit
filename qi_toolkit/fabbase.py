@@ -142,17 +142,18 @@ def setup_backup_env_webfaction():
 
 
 def live(dry_run="False"):
-    env.dry_run = dry_run.lower() == "true"
-    env.python = "python2.6"
-    env.role = "live"
-    env.settings_file = "envs.%(role)s" % env
-    env.hosts = env.production_hosts
-    env.base_path = env.live_app_dir
-    env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
-    env.backup_dir = "%(user_home)s/backups/%(project_name)s" % env
-    env.media_path = env.live_static_dir
-    env.pull_branch = env.live_branch
-    setup_backup_env_webfaction()
+    if confirm("You do mean live, right?"):
+        env.dry_run = dry_run.lower() == "true"
+        env.python = "python2.6"
+        env.role = "live"
+        env.settings_file = "envs.%(role)s" % env
+        env.hosts = env.production_hosts
+        env.base_path = env.live_app_dir
+        env.git_path = "%(live_app_dir)s/%(project_name)s.git" % env
+        env.backup_dir = "%(user_home)s/backups/%(project_name)s" % env
+        env.media_path = env.live_static_dir
+        env.pull_branch = env.live_branch
+        setup_backup_env_webfaction()
     
 def staging(dry_run="False"):
     env.dry_run = dry_run.lower() == "true"
