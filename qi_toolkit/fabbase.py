@@ -142,7 +142,9 @@ def setup_backup_env_webfaction():
 
 
 def live(dry_run="False"):
-    if confirm("You do mean live, right?"):
+    if not confirm("You do mean live, right?"):
+        raise Exception, "Bailing out!"
+    else:
         env.dry_run = dry_run.lower() == "true"
         env.python = "python2.6"
         env.role = "live"
