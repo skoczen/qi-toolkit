@@ -38,7 +38,7 @@ class SimpleSearchableModel(models.Model):
         super(SimpleSearchableModel,self).save(*args, **kwargs)
 
     @classmethod
-    def search(cls, query, delimiter=" ", ignorable_chars=None):
+    def search(cls, query, queryset=None, delimiter=" ", ignorable_chars=None):
         # Accept a list of ignorable characters to strip from the query (dashes in phone numbers, etc)
         if ignorable_chars:
             ignorable_re = re.compile("[%s]+"%("".join(ignorable_chars)))
@@ -50,7 +50,11 @@ class SimpleSearchableModel(models.Model):
         else:
             queries = [query]
         
-        results = cls.objects.all()
+        if not queryset:
+            results = cls.objects.all()
+        else:
+            results = queryset.all()
+
         for q in queries:
             if q != "":
                 results = results.filter(qi_simple_searchable_search_field__icontains=q)
