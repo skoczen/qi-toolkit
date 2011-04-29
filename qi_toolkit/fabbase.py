@@ -103,6 +103,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.is_local = False
     env.local_working_path = "~/workingCopy"
     env.media_dir = "media"
+    env.admin_symlink = "admin"
 
     env.production_hosts = [] 
     env.staging_hosts = []
@@ -305,7 +306,7 @@ def setup_media_symlinks():
     safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
 
 def setup_django_admin_media_symlinks():
-    magic_run("cd %(media_path)s; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media admin")
+    magic_run("cd %(media_path)s; rm admin; ln -s %(virtualenv_path)sdjango/contrib/admin/media %(admin_symlink)s")
 
 def setup_cms_symlinks():
     magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)scms/media/cms .")
