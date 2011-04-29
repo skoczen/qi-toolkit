@@ -595,7 +595,7 @@ def deploy_media():
         print_exception()
 
 
-def deploy_fast(with_media="False", force_pip_upgrade="False", use_unstable="False"):
+def deploy_fast(with_media="True", force_pip_upgrade="False", use_unstable="False"):
     force_pip_upgrade = force_pip_upgrade.lower() == "true"
     with_media = with_media.lower() == "true"
     use_unstable = use_unstable.lower() == "true"
@@ -612,7 +612,7 @@ def deploy_fast(with_media="False", force_pip_upgrade="False", use_unstable="Fal
     reboot()
 
 
-def deploy_slow(with_media="False", force_pip_upgrade="False", use_unstable="False"):
+def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="False"):
     force_pip_upgrade = force_pip_upgrade.lower() == "true"
     with_media = with_media.lower() == "true"
     use_unstable = use_unstable.lower() == "true"
