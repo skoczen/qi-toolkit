@@ -601,13 +601,13 @@ def deploy_fast(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     use_unstable = use_unstable.lower() == "true"
 
     # backup_for_deploy()
+    if with_media:
+        deploy_media()
     pull()
     kill_pyc()
     quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if with_media:
-        deploy_media()
     celery_restart()
     reboot()
 
@@ -617,6 +617,8 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     with_media = with_media.lower() == "true"
     use_unstable = use_unstable.lower() == "true"
 
+    if with_media:
+        deploy_media()
     stop()
     # backup_for_deploy()
     pull()
@@ -624,8 +626,6 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if with_media:
-        deploy_media()
     celery_restart()
     nginx_reboot()
     start()
