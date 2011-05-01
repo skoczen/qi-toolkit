@@ -410,7 +410,7 @@ def safe_install_requirements(force_pip_upgrade=False, use_unstable=False, clear
     "Install the requirements, and upgrade everything."
     install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable, clear_source=clear_source)
    
-
+@runs_once
 def backup_for_deploy():
     "Backup before deploys."
     import os.path
@@ -433,11 +433,13 @@ def backup_for_deploy():
         else:
             raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
 
+@runs_once
 def download_data_dump():
     backup_for_deploy()
     get("%(backup_dir)s/latest_deploy.dump.bz2" % env, env.local_working_path)
     local("bunzip2 %(local_working_path)s/latest_deploy.dump.bz2" % env)
 
+@runs_once
 def load_data_dump_locally(local_file=None):
     env.local_file = local_file
     if not env.local_file:
@@ -447,6 +449,7 @@ def load_data_dump_locally(local_file=None):
     local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
     local("rm %(local_file)s" % env)
 
+@runs_once
 def put_and_load_data_dump(local_file=None):
     if env.role != "live" or confirm("Wait, really? Really really??"):
         env.local_file = local_file
@@ -458,11 +461,12 @@ def put_and_load_data_dump(local_file=None):
         magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(remote_file)s")
         magic_run("rm %(remote_file)s")
     
-
+@runs_once
 def get_and_load_datadump():
     download_data_dump()
     load_data_dump_locally()
 
+@runs_once
 def freeze_current_versions():
     local("pip freeze -r requirements.txt > requirements.stable.txt")
 
@@ -515,7 +519,7 @@ def setup_crontab():
         print_exception()
         pass
 
-
+@runs_once
 def backup_daily():
     if not fabric.contrib.files.exists(env.current_backup_file):
         magic_run("%(backup_dir)s/%(daily_backup_script_name)s")
@@ -568,6 +572,7 @@ cd %(backup_dir)s; scp * %(offsite_backup_dir)s
     # script = script.replace("\n","\\n")
     return script
 
+@runs_once
 def backup_monthly():
     magic_run("%(backup_dir)s/%(monthly_backup_script_name)s")
 
@@ -582,12 +587,15 @@ cp %(backup_dir)s/weeks-ago-0.zip %(backup_dir)s/month-`date +%%F`.zip
 def kill_pyc():
     magic_run("%(work_on)s cd %(git_path)s;find . -iname '*.pyc' -delete")
 
+@runs_once
 def migrate():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
 
+@runs_once
 def syncdb():
     magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
 
+@runs_once
 def deploy_media():
     try:
         local("%(work_on)s cd %(project_name)s; %(python)s manage.py syncmedia --settings=%(settings_file)s" % env)
@@ -630,7 +638,7 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     nginx_reboot()
     start()
 
-
+@runs_once
 def test():
     local("cd %(base_path)s; python manage.py test" % env, fail='abort')
 
