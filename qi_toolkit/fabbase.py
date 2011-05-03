@@ -589,11 +589,11 @@ def kill_pyc():
 
 @runs_once
 def migrate():
-    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate")
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate --database=default")
 
 @runs_once
 def syncdb():
-    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput")
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput --database=default")
 
 @runs_once
 def deploy_media():
