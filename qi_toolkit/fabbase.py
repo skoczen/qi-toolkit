@@ -200,7 +200,7 @@ env.roledefs = {
     'live': [live],
     'staging': [staging],
     'local':[local],
-    'live_db':[production_db],
+    'live_db':[live_db],
     'staging_db':[staging_db],
 }
 
