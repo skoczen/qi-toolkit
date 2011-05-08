@@ -191,7 +191,7 @@ def localhost(dry_run="False"):
     setup_backup_env_webfaction()
 
 def live_db():
-    env.hosts = env.live_db_hosts
+    env.hosts = env.production_db_hosts
 
 def staging_db():
     env.hosts = env.staging_db_hosts
