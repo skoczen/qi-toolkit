@@ -5,8 +5,13 @@ import datetime
 def resave_searchable_models():
     for model in models.get_models():
         if SimpleSearchableModel in model.__bases__:
+            print "Resaving %s (%s records)" % (model,model.objects.all().count())
+            i = 0
             for o in model.objects.all():
                 o.save()
+                i += 1
+                if i % 100:
+                    print "i"
     
 
 class TimestampModelMixin(models.Model):
