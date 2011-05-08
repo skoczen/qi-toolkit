@@ -190,11 +190,11 @@ def localhost(dry_run="False"):
     env.media_path = "%(base_path)s/%(media_dir)s" % env
     setup_backup_env_webfaction()
 
-def production_db():
-    pass
+def live_db():
+    env.hosts = env.live_db_hosts
 
 def staging_db():
-    pass
+    env.hosts = env.staging_db_hosts
 
 env.roledefs = {
     'live': [live],
