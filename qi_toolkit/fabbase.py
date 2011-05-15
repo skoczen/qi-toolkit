@@ -156,6 +156,7 @@ def live(dry_run="False"):
         env.backup_dir = "%(user_home)s/backups/%(project_name)s" % env
         env.media_path = env.live_static_dir
         env.pull_branch = env.live_branch
+        env.release_tag = "%(role)s_release" % env
         setup_backup_env_webfaction()
     
 def staging(dry_run="False"):
@@ -169,6 +170,7 @@ def staging(dry_run="False"):
     env.media_path = env.staging_static_dir
     env.backup_dir = "%(user_home)s/backups/staging_%(project_name)s" % env
     env.pull_branch = env.live_branch
+    env.release_tag = "%(role)s_release" % env
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
@@ -185,6 +187,7 @@ def localhost(dry_run="False"):
     env.git_path = env.base_path
     env.backup_dir = "%(local_working_path)s/db" % env
     env.pull_branch = env.working_branch
+    env.release_tag = "%(role)s_release" % env
     env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
     env.is_local = True
     env.media_path = "%(base_path)s/%(media_dir)s" % env
@@ -319,7 +322,7 @@ def pull():
         "Updates the repository."
         magic_run("cd %(git_path)s; git checkout %(pull_branch)s@;git pull")
     else:
-        magic_run("cd %(git_path)s; git pull; git checkout %(role)s_release")
+        magic_run("cd %(git_path)s; git pull; git checkout %(release_tag)s")
 
 def git_reset(hash=""):
     env.hash = hash
@@ -332,6 +335,9 @@ def ls():
 
 def restart():
     return reboot()
+
+def tag_commit_for_release():
+    local("git tag -d %(release_tag)s; git tag %(release_tag)s; git push --tags" % env)
 
 def reboot():
     "Reboot the wsgi server."
