@@ -80,7 +80,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.staging_app_dir = "%(user_home)s/webapps/%(project_name)s_staging" % env
     env.staging_static_dir = "%(user_home)s/webapps/%(project_name)s_staging_static" % env
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
-    env.work_on = "workon %(virtualenv_name)s; " % env
+    env.work_on = "source %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/activate" % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
@@ -129,7 +129,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.staging_app_dir = env.live_app_dir
     env.staging_static_dir = env.live_static_dir
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
-    env.work_on = "workon %(virtualenv_name)s; " % env
+    env.work_on = "source %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/activate" % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
@@ -173,7 +173,7 @@ def staging(dry_run="False"):
     env.release_tag = "%(role)s_release" % env
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
-    env.work_on = "workon %(virtualenv_name)s; " % env
+    env.work_on = "source %(user_home)s/.virtualenvs/%(virtualenv_name)s/bin/activate" % env
     setup_backup_env_webfaction()
 
 def localhost(dry_run="False"):
