@@ -607,7 +607,7 @@ def syncdb():
 @runs_once
 def deploy_media():
     try:
-        local("%(work_on)s cd %(project_name)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s" % env)
+        local("%(work_on)s cd %(project_name)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s;git checkout %(pull_branch)s" % env)
     except:
         print_exception()
 
