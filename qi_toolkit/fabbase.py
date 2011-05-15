@@ -80,8 +80,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.staging_app_dir = "%(user_home)s/webapps/%(project_name)s_staging" % env
     env.staging_static_dir = "%(user_home)s/webapps/%(project_name)s_staging_static" % env
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
-    env.virtualenv_activate = ".virtualenvs/%(virtualenv_name)s/bin/activate" % env
-    env.work_on = "source %(user_home)s/%(virtualenv_activate)s"
+    env.work_on = "workon %(virtualenv_name)s; " % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
@@ -130,8 +129,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.staging_app_dir = env.live_app_dir
     env.staging_static_dir = env.live_static_dir
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
-    env.virtualenv_activate = ".virtualenvs/%(virtualenv_name)s/bin/activate" % env
-    env.work_on = "source %(user_home)s/%(virtualenv_activate)s"
+    env.work_on = "workon %(virtualenv_name)s; " % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
@@ -175,8 +173,7 @@ def staging(dry_run="False"):
     env.release_tag = "%(role)s_release" % env
     env.virtualenv_name = env.staging_virtualenv_name
     env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
-    env.virtualenv_activate = ".virtualenvs/%(virtualenv_name)s/bin/activate" % env
-    env.work_on = "source %(user_home)s/%(virtualenv_activate)s"
+    env.work_on = "workon %(virtualenv_name)s; " % env
     setup_backup_env_webfaction()
 
 def localhost(dry_run="False"):
@@ -610,7 +607,7 @@ def syncdb():
 @runs_once
 def deploy_media():
     try:
-        local("%(local_working_path)s/%(virtualenv_activate)s cd %(project_name)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s;git checkout %(pull_branch)s" % env)
+        local("%(work_on)s cd %(project_name)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s;git checkout %(pull_branch)s" % env)
     except:
         print_exception()
 
