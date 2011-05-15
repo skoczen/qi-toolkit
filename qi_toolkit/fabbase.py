@@ -322,7 +322,7 @@ def pull():
         "Updates the repository."
         magic_run("cd %(git_path)s; git checkout %(pull_branch)s;git pull")
     else:
-        magic_run("cd %(git_path)s; git checkout %(pull_branch)s; git pull; git checkout %(release_tag)s")
+        magic_run("cd %(git_path)s; git checkout %(pull_branch)s; git fetch --tags; git pull; git checkout %(release_tag)s")
 
 def git_reset(hash=""):
     env.hash = hash
