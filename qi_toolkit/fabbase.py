@@ -149,7 +149,7 @@ def live(dry_run="False"):
         raise Exception, "Bailing out!"
     else:
         env.dry_run = dry_run.lower() == "true"
-        env.python = "python%(python_version)s"
+        env.python = "python%(python_version)s" % env
         env.role = "live"
         env.settings_file = "envs.%(role)s" % env
         env.hosts = env.production_hosts
@@ -163,7 +163,7 @@ def live(dry_run="False"):
     
 def staging(dry_run="False"):
     env.dry_run = dry_run.lower() == "true"
-    env.python = "python%(python_version)s"
+    env.python = "python%(python_version)s" % env
     env.role = "staging"
     env.settings_file = "envs.%(role)s" % env
     env.hosts = env.staging_hosts
