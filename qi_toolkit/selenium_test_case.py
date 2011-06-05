@@ -15,8 +15,8 @@ class QiSeleniumTestCase(SeleniumTestCase):
 
     def js_refresh(self):
         sel = self.selenium
-        sel.get_eval("window.location.href")
-        sel.get_eval("window.location.href=window.location.href;")
+        sel.get_eval("this.browserbot.getUserWindow().location.href")
+        sel.get_eval("this.browserbot.getUserWindow().location.href=window.location.href;")
         time.sleep(4)
 
     def click_and_wait(self, link):

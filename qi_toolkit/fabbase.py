@@ -48,6 +48,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.is_centos = False
 
     # Custom Config Start
+    env.python_version = "2.6"
     env.parent = "origin"
     env.working_branch = "master"
     env.live_branch = "live"
@@ -79,7 +80,7 @@ def setup_env_webfaction(project_name, webfaction_user, initial_settings={}, ove
     env.live_static_dir = "%(user_home)s/webapps/%(project_name)s_static" % env
     env.staging_app_dir = "%(user_home)s/webapps/%(project_name)s_staging" % env
     env.staging_static_dir = "%(user_home)s/webapps/%(project_name)s_staging_static" % env
-    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python%(python_version)s/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
@@ -95,6 +96,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.is_centos = True
 
     # Custom Config Start
+    env.python_version = "2.6"
     env.parent = "origin"
     env.working_branch = "master"
     env.live_branch = "live"
@@ -147,7 +149,7 @@ def live(dry_run="False"):
         raise Exception, "Bailing out!"
     else:
         env.dry_run = dry_run.lower() == "true"
-        env.python = "python2.6"
+        env.python = "python%(python_version)s"
         env.role = "live"
         env.settings_file = "envs.%(role)s" % env
         env.hosts = env.production_hosts
@@ -161,7 +163,7 @@ def live(dry_run="False"):
     
 def staging(dry_run="False"):
     env.dry_run = dry_run.lower() == "true"
-    env.python = "python2.6"
+    env.python = "python%(python_version)s"
     env.role = "staging"
     env.settings_file = "envs.%(role)s" % env
     env.hosts = env.staging_hosts
@@ -172,7 +174,7 @@ def staging(dry_run="False"):
     env.pull_branch = env.live_branch
     env.release_tag = "%(role)s_release" % env
     env.virtualenv_name = env.staging_virtualenv_name
-    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python%(python_version)s/site-packages/" % env    
     env.work_on = "workon %(virtualenv_name)s; " % env
     setup_backup_env_webfaction()
 
@@ -188,7 +190,7 @@ def localhost(dry_run="False"):
     env.backup_dir = "%(local_working_path)s/db" % env
     env.pull_branch = env.working_branch
     env.release_tag = "%(role)s_release" % env
-    env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env    
+    env.virtualenv_path = "~/.virtualenvs/%(virtualenv_name)s/lib/python%(python_version)s/site-packages/" % env    
     env.is_local = True
     env.media_path = "%(base_path)s/%(media_dir)s" % env
     setup_backup_env_webfaction()
@@ -235,7 +237,7 @@ def setup_server():
     if env.is_webfaction:
         try:
             safe_magic_run("mkdir %(user_home)s/src")
-            magic_run("echo \"alias l='ls -agl'\nalias python=python2.6\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(user_home)s/.bashrc")
+            magic_run("echo \"alias l='ls -agl'\nalias python=python%(python_version)s\nexport WORKON_HOME=$HOME/.virtualenvs\nsource ~/bin/virtualenvwrapper.sh\" >> %(user_home)s/.bashrc")
         except:
             pass
 
@@ -256,10 +258,10 @@ def setup_server():
             except:
                 pass
             try:
-                safe_magic_run("mkdir %(user_home)s/lib/python2.6")
+                safe_magic_run("mkdir %(user_home)s/lib/python%(python_version)s")
             except:
                 pass
-            magic_run("easy_install-2.6 pip")
+            magic_run("easy_install-%(python_version)s pip")
 
         magic_run("pip install --upgrade pip virtualenv virtualenvwrapper")
         safe_magic_run("mkdir %(user_home)s/.virtualenvs")
@@ -284,14 +286,14 @@ def setup_server():
             # httpd.conf
             magic_run("mv %(base_path)s/apache2/conf/httpd.conf %(base_path)s/apache2/conf/httpd.conf.bak")
             magic_run("sed 'N;$!P;$!D;$d' %(base_path)s/apache2/conf/httpd.conf.bak > %(base_path)s/apache2/conf/httpd.conf")
-            magic_run("echo 'WSGIPythonPath %(base_path)s:%(base_path)s/lib/python2.6:%(virtualenv_path)s' >> %(base_path)s/apache2/conf/httpd.conf")
+            magic_run("echo 'WSGIPythonPath %(base_path)s:%(base_path)s/lib/python%(python_version)s:%(virtualenv_path)s' >> %(base_path)s/apache2/conf/httpd.conf")
             magic_run("echo 'WSGIScriptAlias / %(base_path)s/%(project_name)s.wsgi' >> %(base_path)s/apache2/conf/httpd.conf")
 
             # WSGI file
             magic_run("touch %(base_path)s/%(project_name)s.wsgi")
             magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
             magic_run("echo 'from django.core.handlers.wsgi import WSGIHandler' >> %(base_path)s/%(project_name)s.wsgi")
-            magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
+            magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python%(python_version)s/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
             magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.envs.%(role)s'\" >> %(base_path)s/%(project_name)s.wsgi")
             magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
 
@@ -301,7 +303,7 @@ def make_wsgi_file():
     magic_run("touch %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'import os, sys' > %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'from django.core.handlers.wsgi import WSGIHandler' >> %(base_path)s/%(project_name)s.wsgi")
-    magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python2.6/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
+    magic_run("echo \"sys.path = ['%(virtualenv_path)s','%(git_path)s/%(project_name)s','/usr/local/lib/python%(python_version)s/site-packages/', '%(git_path)s', '%(virtualenv_path)s../../../src/django-cms'] + sys.path\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo \"os.environ['DJANGO_SETTINGS_MODULE'] = '%(project_name)s.settings'\" >> %(base_path)s/%(project_name)s.wsgi")
     magic_run("echo 'application = WSGIHandler()' >> %(base_path)s/%(project_name)s.wsgi")
 
