@@ -130,7 +130,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.live_static_dir = "%(git_path)s/media" % env
     env.staging_app_dir = env.live_app_dir
     env.staging_static_dir = env.live_static_dir
-    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python2.6/site-packages/" % env
+    env.virtualenv_path = "%(user_home)s/.virtualenvs/%(virtualenv_name)s/lib/python%(python_version)s/site-packages/" % env
     env.work_on = "workon %(virtualenv_name)s; " % env
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
