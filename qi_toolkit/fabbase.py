@@ -353,8 +353,7 @@ def reboot():
 
         magic_run("%(base_path)s/apache2/bin/start;")
     elif env.is_centos:
-        magic_run("service %(project_name)s stop")
-        magic_run("service %(project_name)s start")
+        magic_run("service %(project_name)s restart")
 
 
 def stop():
@@ -363,7 +362,11 @@ def stop():
         if env.is_webfaction:
             magic_run("%(base_path)s/apache2/bin/stop;")
         elif env.is_centos:
-            magic_run("service %(project_name)s stop")
+            try:
+                magic_run("service %(project_name)s stop")
+            except:
+                # Don't fail if it's already stopped.
+                pass
 
 def start():
     "Start the wsgi server."
