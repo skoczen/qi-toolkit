@@ -1,5 +1,10 @@
 import sys
 
+class classproperty(property):
+    def __get__(self, cls, owner):
+        return self.fget.__get__(None, owner)()
+
+
 def render_to(template):
     from django.shortcuts import render_to_response
     from django.template import RequestContext
