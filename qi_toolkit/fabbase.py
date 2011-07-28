@@ -311,7 +311,7 @@ def setup_media_symlinks():
     safe_magic_run("cd %(media_path)s; ln -s %(git_path)s/%(media_dir)s/* .")
 
 def setup_django_admin_media_symlinks():
-    magic_run("cd %(media_path)s; rm %(admin_symlink)s; ln -s %(virtualenv_path)sdjango/contrib/admin/media %(admin_symlink)s")
+    magic_run("cd %(media_path)s; rm -rf %(admin_symlink)s; ln -s %(virtualenv_path)sdjango/contrib/admin/media %(admin_symlink)s")
 
 def setup_cms_symlinks():
     magic_run("cd %(media_path)s; touch cms; rm cms; ln -s %(virtualenv_path)scms/media/cms .")
