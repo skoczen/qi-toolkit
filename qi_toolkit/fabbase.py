@@ -431,7 +431,7 @@ def backup_for_deploy():
     if env.is_webfaction:
         env.current_backup_file = "%(backup_dir)s/currentDeployBackup.json" % env    
         if not os.path.isfile(env.current_backup_file):
-            magic_run("%(work_on)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
+            magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s")
             magic_run("zip -r9q %(backup_dir)s/pre_deploy_`date +%%F`.zip %(current_backup_file)s; rm %(current_backup_file)s")
             if env.is_local:
                 magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
@@ -440,7 +440,7 @@ def backup_for_deploy():
     elif env.is_centos:
         env.current_backup_file = "%(backup_dir)s/currentDeployBackup.dump" % env    
         if not os.path.isfile(env.current_backup_file):
-            magic_run("%(work_on)s; %(python)s manage.py dumpdb > %(current_backup_file)s")
+            magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py dumpdb > %(current_backup_file)s")
             magic_run("bzip2 -9q %(current_backup_file)s; mv %(current_backup_file)s.bz2 %(backup_dir)s/pre_deploy_`date +%%F`.bz2 ;cp %(backup_dir)s/pre_deploy_`date +%%F`.bz2 %(backup_dir)s/latest_deploy.dump.bz2")
             if env.is_local:
                 magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
@@ -460,7 +460,7 @@ def load_data_dump_locally(local_file=None):
         env.local_file = "%(local_working_path)s/latest_deploy.dump" % env
     
 
-    local("%(work_on)s; %(python)s manage.py restoredb < %(local_file)s" % env)
+    local("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(local_file)s" % env)
     local("rm %(local_file)s" % env)
 
 @runs_once
@@ -472,7 +472,7 @@ def put_and_load_data_dump(local_file=None):
         
         env.remote_file = "%(base_path)s/latest_deploy.dump" % env
         put(env.local_file, env.remote_file)
-        magic_run("%(work_on)s; %(python)s manage.py restoredb < %(remote_file)s")
+        magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py restoredb < %(remote_file)s")
         magic_run("rm %(remote_file)s")
     
 @runs_once
@@ -544,7 +544,7 @@ def backup_daily():
 def daily_backup_script():    
     script = """#!/bin/bash
 source %(user_home)s/bin/virtualenvwrapper.sh
-%(work_on)s; 
+%(work_on)s cd %(project_name)s; 
 %(python)s manage.py dumpdata --indent 4 > %(current_backup_file)s
 
 mv %(backup_dir)s/days-ago-6.zip %(backup_dir)s/days-ago-7.zip
@@ -603,16 +603,16 @@ def kill_pyc():
 
 @runs_once
 def migrate():
-    magic_run("%(work_on)s; %(python)s manage.py migrate --database=default")
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py migrate --database=default")
 
 @runs_once
 def syncdb():
-    magic_run("%(work_on)s; %(python)s manage.py syncdb --noinput --database=default")
+    magic_run("%(work_on)s cd %(project_name)s; %(python)s manage.py syncdb --noinput --database=default")
 
 @runs_once
 def deploy_media():
     try:
-        local("%(work_on)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s;git checkout %(pull_branch)s" % env)
+        local("%(work_on)s cd %(project_name)s; git checkout %(release_tag)s; %(python)s manage.py syncmedia --settings=%(settings_file)s;git checkout %(pull_branch)s" % env)
     except:
         print_exception()
 
