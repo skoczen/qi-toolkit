@@ -377,7 +377,8 @@ def start():
 
 def nginx_reboot():
     if env.is_centos:
-        magic_run("service nginx restart")
+        magic_run("service nginx stop")
+        magic_run("service nginx start")
 
 def nginx_stop():
     if env.is_centos:
@@ -389,15 +390,15 @@ def nginx_start():
 
 def celery_restart():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s restart")
+        magic_run("service celeryd restart")
 
 def celery_stop():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s stop")
+        magic_run("service celeryd stop")
 
 def celery_start():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s start")    
+        magic_run("service celeryd start")    
 
 def install_requirements(force_pip_upgrade=False, use_unstable=True, clear_source=True):
     "Install the requirements."
