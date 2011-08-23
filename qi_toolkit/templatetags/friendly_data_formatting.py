@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.template.defaultfilters import date, timesince
 import datetime
+import pytz  
 
 @register.filter
 def clean_none(str):
@@ -104,6 +105,23 @@ def pretty_timesince(this_date):
         from qi_toolkit.helpers import print_exception
         print_exception()
         return date(this_date)
+
+
+# Timezone filters from http://bitkickers.blogspot.com/2010/12/per-user-timezones-in-django.html
+# need to translate to a non-naive timezone, even if timezone == settings.TIME_ZONE, so we can compare two dates  
+@register.filter
+def to_user_timezone(date, profile):  
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE                 
+    return date.replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(timezone))  
+
+@register.filter
+def to_system_timezone(date, profile):  
+    timezone = profile.timezone if profile.timezone else settings.TIME_ZONE                 
+    return date.replace(tzinfo=pytz.timezone(timezone)).astimezone(pytz.timezone(settings.TIME_ZONE))  
+
+@register.filter
+def now_timezone():     
+    return datetime.datetime.now().replace(tzinfo=pytz.timezone(settings.TIME_ZONE)).astimezone(pytz.timezone(settings.TIME_ZONE))  
 
 def _to_frac(x, maxdenom=10): 
     """ 
