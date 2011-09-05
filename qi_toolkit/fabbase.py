@@ -217,11 +217,8 @@ def safe(function_call, *args, **kwargs):
         pass
 
 def safe_magic_run(function_call, *args, **kwargs):
-    try:
-        ret = magic_run(function_call, *args, **kwargs)
-        return ret
-    except:
-        pass    
+    with fabric.context_managers.settings(warn_only=True):
+        return magic_run(function_call, *args, **kwargs)  
 
 # Custom Config End
 def magic_run(function_call):
