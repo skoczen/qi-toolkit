@@ -146,7 +146,7 @@ def setup_backup_env_webfaction():
 
 def live(dry_run="False"):
     if not confirm("You do mean live, right?"):
-        raise Exception, "Bailing out!"
+        abort("Bailing out!")
     else:
         env.dry_run = dry_run.lower() == "true"
         env.python = "python%(python_version)s" % env
@@ -435,7 +435,7 @@ def backup_for_deploy():
             if env.is_local:
                 magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
         else:
-            raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
+            abort("Deploy backup failed - previous deploy did not finish cleanly.")
     elif env.is_centos:
         env.current_backup_file = "%(backup_dir)s/currentDeployBackup.dump" % env    
         if not os.path.isfile(env.current_backup_file):
@@ -444,7 +444,7 @@ def backup_for_deploy():
             if env.is_local:
                 magic_run("cp %(current_backup_file)s %(git_path)s/db/all_data.json")
         else:
-            raise  Exception, "Deploy backup failed - previous deploy did not finish cleanly."
+            abort("Deploy backup failed - previous deploy did not finish cleanly.")
 
 @runs_once
 def download_data_dump():
@@ -537,7 +537,7 @@ def backup_daily():
     if not fabric.contrib.files.exists(env.current_backup_file):
         magic_run("%(backup_dir)s/%(daily_backup_script_name)s")
     else: 
-        raise Exception, "Backup FAILED.  Previous backup did not complete.  Please manually fix the server."
+        abort("Backup FAILED.  Previous backup did not complete.  Please manually fix the server.")
 
 
 def daily_backup_script():    
