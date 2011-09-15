@@ -60,6 +60,14 @@ class QiFactory:
     def rand_us_state(cls):
         return STATE_CHOICES[cls.rand_int(0,len(STATE_CHOICES)-1)][0]
 
+    @classmethod
+    def valid_test_cc_number(cls):
+        return "4242424242424242"
+
+    @classmethod
+    def invalid_test_cc_number(cls):
+        return "4242424242424241"
+
 
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
 "Maria", "Susan", "Margaret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", 
