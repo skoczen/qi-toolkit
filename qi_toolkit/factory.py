@@ -68,6 +68,15 @@ class QiFactory:
     def invalid_test_cc_number(cls):
         return "4242424242424241"
 
+    @classmethod
+    def test_cc_number(cls, valid=True):
+        if valid:
+            return cls.valid_test_cc_number()
+        else:
+            return cls.invalid_test_cc_number()
+
+
+
 
 RANDOM_NAME_SOURCE = ["Atricia", "Linda", "Barbara", "Elizabeth", "Jennifer", 
 "Maria", "Susan", "Margaret", "Dorothy", "Lisa", "Nancy", "Karen", "Betty", 
