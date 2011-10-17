@@ -135,6 +135,11 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
+    @property
+    def _has_separate_celery_server():
+
+    env.has_separate_celery_server
+
     env.update(overrides)
 
 def setup_backup_env_webfaction():
@@ -328,12 +333,12 @@ def setup_cms_symlinks():
 def setup_project_symlinks():
     pass
 
-def pull():
+def pull(custom_env=None):
     if env.is_webfaction:
         "Updates the repository."
-        magic_run("cd %(git_path)s; git checkout %(pull_branch)s;git pull")
+        magic_run("cd %(git_path)s; git checkout %(pull_branch)s;git pull", custom_env)
     else:
-        magic_run("cd %(git_path)s; git checkout %(pull_branch)s; git fetch --tags; git pull; git checkout %(release_tag)s")
+        magic_run("cd %(git_path)s; git checkout %(pull_branch)s; git fetch --tags; git pull; git checkout %(release_tag)s", custom_env)
 
 def git_reset(hash=""):
     env.hash = hash
@@ -398,11 +403,13 @@ def nginx_start():
 
 def celery_env():
     c_env = env
-    try:
-        c_env.hosts = locals()["env.%s_celery_hosts"]
-    except:
-        pass
+    if "%s_celery_hosts" % env.role in env:
+        c_env.hosts = locals()["env.%s_celery_hosts" % env.role]
     return c_env
+
+def celery_pull():
+    if env.is_centos:
+        pull(celery_env())
 
 def celery_restart():
     if env.is_centos:
@@ -646,6 +653,8 @@ def deploy_fast(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
+    if env.has_separate_celery_server:
+        celery_pull()
     celery_restart()
     reboot()
 
@@ -664,6 +673,8 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
+    if env.has_separate_celery_server:
+        celery_pull()
     celery_restart()
     nginx_reboot()
     start()
