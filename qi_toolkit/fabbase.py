@@ -135,11 +135,6 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
     env.backup_root = "%(user_home)s/backups" % env
     env.offsite_backup_dir = "aglzen@quantumimagery.com:/home/aglzen/%(project_name)s/data/" % env
 
-    @property
-    def _has_separate_celery_server():
-        return hasattr(env,"%s_celery_hosts" % env.role)
-    env.has_separate_celery_server = _has_separate_celery_server
-
     env.update(overrides)
 
 def setup_backup_env_webfaction():
@@ -211,6 +206,10 @@ def live_celery():
 
 def staging_celery():
     env.hosts = env.staging_celery_hosts
+
+@property
+def has_separate_celery_server():
+    return hasattr(env,"%s_celery_hosts" % env.role)
 
 env.roledefs = {
     'live': [live],
@@ -403,7 +402,7 @@ def nginx_start():
 
 def celery_env():
     c_env = env
-    if env.has_separate_celery_server:
+    if has_separate_celery_server:
         c_env.hosts = getattr(env,"%s_celery_hosts" % env.role)
     return c_env
 
@@ -653,7 +652,7 @@ def deploy_fast(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if env.has_separate_celery_server:
+    if has_separate_celery_server:
         celery_pull()
     celery_restart()
     reboot()
@@ -673,7 +672,7 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if env.has_separate_celery_server:
+    if has_separate_celery_server:
         celery_pull()
     celery_restart()
     nginx_reboot()
