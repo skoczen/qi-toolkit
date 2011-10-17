@@ -207,7 +207,6 @@ def live_celery():
 def staging_celery():
     env.hosts = env.staging_celery_hosts
 
-@property
 def has_separate_celery_server():
     return hasattr(env,"%s_celery_hosts" % env.role)
 
@@ -402,7 +401,7 @@ def nginx_start():
 
 def celery_env():
     c_env = env
-    if has_separate_celery_server:
+    if has_separate_celery_server():
         c_env.hosts = getattr(env,"%s_celery_hosts" % env.role)
     return c_env
 
@@ -652,7 +651,7 @@ def deploy_fast(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     quick_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if has_separate_celery_server:
+    if has_separate_celery_server():
         celery_pull()
     celery_restart()
     reboot()
@@ -672,7 +671,7 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     safe_install_requirements(force_pip_upgrade=force_pip_upgrade, use_unstable=use_unstable)
     syncdb()
     migrate()
-    if has_separate_celery_server:
+    if has_separate_celery_server():
         celery_pull()
     celery_restart()
     nginx_reboot()
