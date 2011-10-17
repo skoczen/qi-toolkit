@@ -201,12 +201,20 @@ def live_db():
 def staging_db():
     env.hosts = env.staging_db_hosts
 
+def live_celery():
+    env.hosts = env.production_celery_hosts
+
+def staging_celery():
+    env.hosts = env.staging_celery_hosts
+
 env.roledefs = {
     'live': [live],
     'staging': [staging],
     'local':[local],
     'live_db':[live_db],
     'staging_db':[staging_db],
+    'live_celery':[live_celery],
+    'staging_celery':[staging_celery],
 }
 
 def safe(function_call, *args, **kwargs):
@@ -221,14 +229,18 @@ def safe_magic_run(function_call, *args, **kwargs):
         return magic_run(function_call, *args, **kwargs)  
 
 # Custom Config End
-def magic_run(function_call):
-    if env.dry_run:
-        print function_call % env
+def magic_run(function_call, custom_env=None):
+    if custom_env:
+        c_env = custom_env
     else:
-        if env.is_local:
-            return local(function_call % env)
+        c_env = env
+    if c_env.dry_run:
+        print function_call % c_env
+    else:
+        if c_env.is_local:
+            return local(function_call % c_env)
         else:
-            return run(function_call % env)
+            return run(function_call % c_env)
 
 def setup_server():
     if env.is_webfaction:
@@ -384,17 +396,25 @@ def nginx_start():
     if env.is_centos:
         magic_run("service nginx start")    
 
+def celery_env():
+    c_env = env
+    try:
+        c_env.hosts = locals()["env.%s_celery_hosts"]
+    except:
+        pass
+    return c_env
+
 def celery_restart():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s restart")
+        magic_run("service celeryd-%(project_name)s restart", celery_env())
 
 def celery_stop():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s stop")
+        magic_run("service celeryd-%(project_name)s stop", celery_env())
 
 def celery_start():
     if env.is_centos:
-        magic_run("service celeryd-%(project_name)s start")    
+        magic_run("service celeryd-%(project_name)s start", celery_env())
 
 def install_requirements(force_pip_upgrade=False, use_unstable=True, clear_source=True):
     "Install the requirements."
