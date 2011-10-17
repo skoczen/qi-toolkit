@@ -137,7 +137,7 @@ def setup_env_centos(project_name, system_user="root", initial_settings={}, over
 
     @property
     def _has_separate_celery_server():
-        return "%s_celery_hosts" % env.role in env
+        return hasattr(env,"%s_celery_hosts" % env.role)
     env.has_separate_celery_server = _has_separate_celery_server
 
     env.update(overrides)
@@ -404,7 +404,7 @@ def nginx_start():
 def celery_env():
     c_env = env
     if env.has_separate_celery_server:
-        c_env.hosts = locals()["env.%s_celery_hosts" % env.role]
+        c_env.hosts = getattr(env,"%s_celery_hosts" % env.role)
     return c_env
 
 def celery_pull():
