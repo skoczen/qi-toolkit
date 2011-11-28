@@ -679,9 +679,6 @@ def deploy_slow(with_media="True", force_pip_upgrade="False", use_unstable="Fals
     nginx_reboot()
     start()
 
-@runs_once
-def test():
-    local("cd %(base_path)s; python manage.py test" % env, fail='abort')
 
 def reset(repo, hash):
     """

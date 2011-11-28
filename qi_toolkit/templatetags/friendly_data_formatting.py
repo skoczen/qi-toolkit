@@ -17,6 +17,9 @@ def clean_none(str):
     else:
         return ""
 
+@register.filter
+def strip_newlines(s):
+    return s.replace("\n", "")
 
 @register.filter
 def multiply(n1, n2):
